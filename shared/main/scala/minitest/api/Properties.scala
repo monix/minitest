@@ -1,6 +1,7 @@
 package minitest.api
 
 import scala.util.control.NonFatal
+import minitest.api.Utils.silent
 
 case class Properties[I](
   setup: () => I,
@@ -13,16 +14,23 @@ case class Properties[I](
       Property[Unit, Unit](property.name, { ignore =>
         try {
           val env = setup()
+          var thrownError = true
+
           try {
-            property(env)
+            val result = property(env)
+            thrownError = false
+            result
           }
           finally {
-            tearDown(env)
+            if (thrownError)
+              silent(tearDown(env))
+            else
+              tearDown(env)
           }
         }
         catch {
           case NonFatal(ex) =>
-            Result.Exception(ex, None)
+            Result.from(ex)
         }
       })
   }
