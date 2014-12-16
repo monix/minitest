@@ -4,3 +4,4 @@ resolvers += Resolver.url("scala-js-releases",
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.0-M2")
 
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.5")

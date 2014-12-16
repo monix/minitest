@@ -1,34 +1,18 @@
+import com.typesafe.sbt.pgp.PgpKeys
 import sbt.Keys._
 import sbt.{Build => SbtBuild, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin
+import sbtrelease.ReleasePlugin._
+import sbtrelease.ReleasePlugin.ReleaseKeys._
 
 object Build extends SbtBuild {
-  val projectVersion = "0.1"
-
-  val sharedSettings = Seq(
+  val baseSettings = releaseSettings ++ Seq(
     organization := "org.monifu",
-    version := projectVersion,
 
     scalaVersion := "2.11.4",
-
-    unmanagedSourceDirectories in Compile <+= baseDirectory(_ /  "shared" / "main" / "scala"),
-    unmanagedSourceDirectories in Test <+= baseDirectory(_ / "shared" / "test" / "scala"),
-
-    scalacOptions <<= baseDirectory.map { bd => Seq("-sourcepath", bd.getAbsolutePath) },
-
-    scalacOptions ++= Seq(
-      "-unchecked", "-deprecation", "-feature", "-Xlint", "-target:jvm-1.6",
-      "-Yinline-warnings", "-optimise", "-Ywarn-adapted-args",
-      "-Ywarn-dead-code", "-Ywarn-inaccessible", "-Ywarn-nullary-override",
-      "-Ywarn-nullary-unit", "-Xlog-free-terms"
-    ),
-
-    resolvers ++= Seq(
-      "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
-      Resolver.sonatypeRepo("releases")
-    ),
-
-    libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile"),
+    crossScalaVersions := Seq("2.11.4", "2.10.4"),
+    publishArtifactsAction := PgpKeys.publishSigned.value,
+    crossBuild := true,
 
     // -- Settings meant for deployment on oss.sonatype.org
 
@@ -37,16 +21,16 @@ object Build extends SbtBuild {
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
       if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
+        Some("snapshots" at nexus + "content/repositories/snapshots")
       else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
 
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
 
     pomExtra :=
-      <url>http://www.monifu.org/</url>
+      <url>https://github.com/monifu/minitest/</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
@@ -67,9 +51,31 @@ object Build extends SbtBuild {
         </developers>
   )
 
+  val sharedSettings = baseSettings ++ Seq(
+    unmanagedSourceDirectories in Compile <+= baseDirectory(_ /  "shared" / "main" / "scala"),
+    unmanagedSourceDirectories in Test <+= baseDirectory(_ / "shared" / "test" / "scala"),
+
+    scalacOptions <<= baseDirectory.map { bd => Seq("-sourcepath", bd.getAbsolutePath) },
+
+    scalacOptions ++= Seq(
+      "-unchecked", "-deprecation", "-feature", "-Xlint", "-target:jvm-1.6",
+      "-Yinline-warnings", "-optimise", "-Ywarn-adapted-args",
+      "-Ywarn-dead-code", "-Ywarn-inaccessible", "-Ywarn-nullary-override",
+      "-Ywarn-nullary-unit", "-Xlog-free-terms"
+    ),
+
+    resolvers ++= Seq(
+      "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
+      Resolver.sonatypeRepo("releases")
+    ),
+
+    libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile")
+  )
+
   // -- Root aggregating everything
   lazy val root = project.in(file("."))
     .aggregate(jvm, js)
+    .settings(baseSettings : _*)
     .settings(
       name := "root",
       publishArtifact := false,
