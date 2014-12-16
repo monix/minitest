@@ -5,7 +5,7 @@ A mini testing framework for Scala, cross-compiled for
 
 ## Usage in SBT
 
-For the JVM:
+For the JVM, in the main `build.sbt`:
 
 ```scala
 libraryDependencies += "org.monifu" %% "minitest" % "0.2"
@@ -13,7 +13,7 @@ libraryDependencies += "org.monifu" %% "minitest" % "0.2"
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
-For Scala.js:
+For Scala.js, in the main `build.sbt`:
 
 ```scala
 libraryDependencies += "org.monifu" %%% "minitest" % "0.2" % "test"
