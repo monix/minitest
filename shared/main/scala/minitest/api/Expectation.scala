@@ -4,7 +4,7 @@ import language.experimental.macros
 import scala.reflect.macros.Context
 import scala.util.control.NonFatal
 
-final class Expectation[T](val callback: () => T, val hint: String)
+final class Expectation[T](val callback: () => T, val valueName: String)
 
 object Expectation {
   implicit class Extensions[T](val self: Expectation[T]) extends AnyVal {
@@ -18,6 +18,12 @@ object Expectation {
     def toBeFalse(implicit ev: T <:< Boolean): Unit = macro Macros.toBeFalse[T]
 
     def toThrow[E <: Throwable]: Unit = macro Macros.toThrow[E]
+
+    def toBeInstanceOf[I]: Unit = macro Macros.toBeInstanceOf[I]
+    def toNotBeInstanceOf[I]: Unit = macro Macros.toNotBeInstanceOf[I]
+
+    def toBeNull: Unit = macro Macros.toBeNull
+    def toNotBeNull: Unit = macro Macros.toNotBeNull
   }
 
   object Macros {
@@ -33,10 +39,10 @@ object Expectation {
 
         val (got, value, hint) = try {
           val self = c.prefix.splice.self
-          (self.callback(), expected.splice, self.hint)
+          (self.callback(), expected.splice, self.valueName)
         }
         catch {
-          case NonFatal(ex) =>
+          case NotOurException(ex) =>
             throw new UnexpectedException(ex, path, line)
         }
 
@@ -59,10 +65,10 @@ object Expectation {
 
         val (got, value, hint) = try {
           val self = c.prefix.splice.self
-          (self.callback(), notExpected.splice, self.hint)
+          (self.callback(), notExpected.splice, self.valueName)
         }
         catch {
-          case NonFatal(ex) =>
+          case NotOurException(ex) =>
             throw new UnexpectedException(ex, path, line)
         }
 
@@ -86,10 +92,10 @@ object Expectation {
         val (received, hint) = try {
           val self = c.prefix.splice.self
           val value = self.callback().asInstanceOf[Boolean]
-          (value, self.hint)
+          (value, self.valueName)
         }
         catch {
-          case NonFatal(ex) =>
+          case NotOurException(ex) =>
             throw new UnexpectedException(ex, path, line)
         }
 
@@ -113,10 +119,10 @@ object Expectation {
         val (received, hint) = try {
           val self = c.prefix.splice.self
           val value = self.callback().asInstanceOf[Boolean]
-          (value, self.hint)
+          (value, self.valueName)
         }
         catch {
-          case NonFatal(ex) =>
+          case NotOurException(ex) =>
             throw new UnexpectedException(ex, path, line)
         }
 
@@ -143,14 +149,118 @@ object Expectation {
 
         try {
           self.callback()
-          val hint = self.hint
+          val hint = self.valueName
           val msg = (if (hint.isEmpty) "" else hint + " ") + " didn't throw a " + name
           throw new ExpectationException(msg, path, line)
         }
         catch {
           case NonFatal(ex) if ex.isInstanceOf[E] =>
             ()
-          case NonFatal(ex) if !ex.isInstanceOf[ExpectationException] =>
+          case NotOurException(ex) =>
+            throw new UnexpectedException(ex, path, line)
+        }
+      }
+    }
+
+    def toBeNull(c: Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
+      import c.universe._
+      val (pathExpr, lineExpr) = location(c)
+
+      reify {
+        val path = pathExpr.splice
+        val line = lineExpr.splice
+        val self = c.prefix.splice.self
+
+        try {
+          val value = self.callback()
+          val hint = self.valueName
+          if (value != null && value != None) {
+            val m = (if (hint.isEmpty) "value " else hint + " ") + "is not null"
+            throw new ExpectationException(m, path, line)
+          }
+        }
+        catch {
+          case NotOurException(ex) =>
+            throw new UnexpectedException(ex, path, line)
+        }
+      }
+    }
+
+    def toNotBeNull(c: Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
+      import c.universe._
+      val (pathExpr, lineExpr) = location(c)
+
+      reify {
+        val path = pathExpr.splice
+        val line = lineExpr.splice
+        val self = c.prefix.splice.self
+
+        try {
+          val value = self.callback()
+          val hint = self.valueName
+          if (value == null || value == None) {
+            val m = (if (hint.isEmpty) "value " else hint + " ") + "is null"
+            throw new ExpectationException(m, path, line)
+          }
+        }
+        catch {
+          case NotOurException(ex) =>
+            throw new UnexpectedException(ex, path, line)
+        }
+      }
+    }
+
+    def toBeInstanceOf[I : c.WeakTypeTag]
+      (c: Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
+
+      import c.universe._
+      val (pathExpr, lineExpr) = location(c)
+      val typeTag = weakTypeTag[I]
+      val nameExpr = c.Expr[String](Literal(Constant(typeTag.tpe.toString)))
+
+      reify {
+        val path = pathExpr.splice
+        val line = lineExpr.splice
+        val self = c.prefix.splice.self
+        val name = nameExpr.splice
+
+        try {
+          if (!self.callback().isInstanceOf[I]) {
+            val hint = self.valueName
+            val m = (if (hint.isEmpty) "object " else hint + " ") + "isn't an instance of " + name
+            throw new ExpectationException(m, path, line)
+          }
+        }
+        catch {
+          case NotOurException(ex) =>
+            throw new UnexpectedException(ex, path, line)
+        }
+      }
+    }
+
+    def toNotBeInstanceOf[I : c.WeakTypeTag]
+      (c: Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
+
+      import c.universe._
+      val (pathExpr, lineExpr) = location(c)
+      val typeTag = weakTypeTag[I]
+      val nameExpr = c.Expr[String](Literal(Constant(typeTag.tpe.toString)))
+
+      reify {
+        val path = pathExpr.splice
+        val line = lineExpr.splice
+        val self = c.prefix.splice.self
+        val name = nameExpr.splice
+
+        try {
+          if (self.callback().isInstanceOf[I]) {
+            val hint = self.valueName
+            val m = (if (hint.isEmpty) "object " else hint + " ") + "is an instance of " + name
+            throw new ExpectationException(m, path, line)
+          }
+        }
+        catch {
+          case NotOurException(ex) =>
             throw new UnexpectedException(ex, path, line)
         }
       }

@@ -2,7 +2,7 @@ package minitest.runner
 
 import sbt.testing._
 import sbt.testing.{Task => BaseTask}
-import minitest.api.{Result, TestSuite}
+import minitest.api.{Utils, Result, TestSuite}
 
 final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   def tags(): Array[String] = Array.empty
@@ -15,7 +15,7 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   }
 
   def execute(eventHandler: EventHandler, loggers: Array[Logger]): Array[BaseTask] = {
-    for (suite <- Platform.loadModule[TestSuite](task.fullyQualifiedName(), cl)) {
+    for (suite <- Utils.loadModule[TestSuite](task.fullyQualifiedName(), cl)) {
       loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
 
       for (property <- suite.properties) {
