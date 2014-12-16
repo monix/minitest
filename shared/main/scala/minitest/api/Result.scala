@@ -69,4 +69,13 @@ object Result {
       s"$RED    $stackTrace"
     }
   }
+
+  def from(error: Throwable) = error match {
+    case ex: ExpectationException =>
+      Result.Failure(ex.message, Some(ex), Some(ErrorLocation(ex.path, ex.line)))
+    case ex: UnexpectedException =>
+      Result.Exception(ex.raison, Some(ErrorLocation(ex.path, ex.line)))
+    case other =>
+      Result.Exception(other, None)
+  }
 }

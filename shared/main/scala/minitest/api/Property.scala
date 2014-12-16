@@ -16,12 +16,8 @@ object Property {
         Result.Success(())
       }
       catch {
-        case ex: ExpectationException =>
-          Result.Failure(ex.message, Some(ex), Some(ErrorLocation(ex.path, ex.line)))
-        case ex: UnexpectedException =>
-          Result.Exception(ex.raison, Some(ErrorLocation(ex.path, ex.line)))
         case NonFatal(ex) =>
-          Result.Exception(ex, None)
+          Result.from(ex)
       }
     })
 }
