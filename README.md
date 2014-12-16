@@ -64,20 +64,16 @@ object MyTestSuite extends TestSuite[Int] {
     expect(env > 0).toBe(true)
   }
 
-  test("should be") { env =>
-    expect(env).toBe(env)
+  test("should be positive") { env =>
+    expect(env > 0).toBeTrue
   }
 
-  test("should not be") { env =>
+  test("should be lower or equal to 100") { env =>
+    expect(env <= 100).toBeTrue
+  }
+
+  test("should do addition") { env =>
     expect(env + 1).toNotBe(env)
-  }
-
-  test("should be true") { env =>
-    expect(env == env).toBeTrue
-  }
-
-  test("should be false") { env =>
-    expect(env == 0).toBeFalse
   }
 }
 ```
