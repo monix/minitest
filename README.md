@@ -3,12 +3,22 @@
 A mini testing framework for Scala, cross-compiled for
 [Scala.js](http://www.scala-js.org/) (currently `0.6.0-M2`).
 
-## Usage
+## Usage in SBT
+
+For the JVM:
 
 ```scala
 libraryDependencies += "org.monifu" %% "minitest" % "0.2"
 
-testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
+testFrameworks += new TestFramework("minitest.runner.Framework")
+```
+
+For Scala.js:
+
+```scala
+libraryDependencies += "org.monifu" %%% "minitest" % "0.2" % "test"
+
+testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
 ## Tutorial
