@@ -1,7 +1,7 @@
 package minitest.api
 
 import language.experimental.macros
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.Context
 import scala.util.control.NonFatal
 
 final class Expectation[T](val callback: () => T, val hint: String)
@@ -21,7 +21,7 @@ object Expectation {
   }
 
   object Macros {
-    def toEqual[T : c.WeakTypeTag](c: blackbox.Context { type PrefixType = Extensions[T] })
+    def toEqual[T : c.WeakTypeTag](c: Context { type PrefixType = Extensions[T] })
         (expected: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
@@ -47,7 +47,7 @@ object Expectation {
       }
     }
 
-    def toNotEqual[T : c.WeakTypeTag](c: blackbox.Context { type PrefixType = Extensions[T] })
+    def toNotEqual[T : c.WeakTypeTag](c: Context { type PrefixType = Extensions[T] })
         (notExpected: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
@@ -73,7 +73,7 @@ object Expectation {
       }
     }
 
-    def toBeTrue[T : c.WeakTypeTag](c: blackbox.Context { type PrefixType = Extensions[T] })
+    def toBeTrue[T : c.WeakTypeTag](c: Context { type PrefixType = Extensions[T] })
         (ev: c.Expr[<:<[T,Boolean]]): c.Expr[Unit] = {
 
       import c.universe._
@@ -100,7 +100,7 @@ object Expectation {
       }
     }
 
-    def toBeFalse[T : c.WeakTypeTag](c: blackbox.Context { type PrefixType = Extensions[T] })
+    def toBeFalse[T : c.WeakTypeTag](c: Context { type PrefixType = Extensions[T] })
         (ev: c.Expr[<:<[T,Boolean]]): c.Expr[Unit] = {
 
       import c.universe._
@@ -128,7 +128,7 @@ object Expectation {
     }
 
     def toThrow[E <: Throwable : c.WeakTypeTag]
-      (c: blackbox.Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
+      (c: Context { type PrefixType = Extensions[_] }): c.Expr[Unit] = {
 
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
@@ -156,7 +156,7 @@ object Expectation {
       }
     }
 
-    def location(c: blackbox.Context) = {
+    def location(c: Context) = {
       import c.universe._
       val line = c.Expr[Int](Literal(Constant(c.enclosingPosition.line)))
       val fileName = c.enclosingPosition.source.file.file.getName
