@@ -1,17 +1,20 @@
 package minitest.runner
 
-import minitest.api.{Result, TestSuite}
 import sbt.testing._
+import sbt.testing.{Task => BaseTask}
+import minitest.api.{Result, TestSuite}
 
-final class TaskRunner(task: TaskDef, cl: ClassLoader) extends Task {
+final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   def tags(): Array[String] = Array.empty
   def taskDef(): TaskDef = task
 
-  def execute(eventHandler: EventHandler, loggers: Array[Logger], continuation: (Array[Task]) => Unit): Unit = {
+  def execute(eventHandler: EventHandler, loggers: Array[Logger],
+    continuation: (Array[BaseTask]) => Unit): Unit = {
+    
     continuation(execute(eventHandler, loggers))
   }
 
-  def execute(eventHandler: EventHandler, loggers: Array[Logger]): Array[Task] = {
+  def execute(eventHandler: EventHandler, loggers: Array[Logger]): Array[BaseTask] = {
     for (suite <- Platform.loadModule[TestSuite](task.fullyQualifiedName(), cl)) {
       loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
 

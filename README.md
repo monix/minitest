@@ -83,7 +83,7 @@ That all you need to know.
 ## License
 
 All code in this repository is licensed under the Apache License, Version 2.0.
-See [LICENCE.txt](./LICENSE.txt).
+See [LICENCE](./LICENSE).
 
 Copyright &copy; 2014 Alexandru Nedelcu
 
