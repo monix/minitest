@@ -6,7 +6,7 @@ A mini testing framework for Scala, cross-compiled for
 ## Usage
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.1"
+libraryDependencies += "org.monifu" %% "minitest" % "0.2"
 
 testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
 ```
