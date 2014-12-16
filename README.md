@@ -21,6 +21,10 @@ libraryDependencies += "org.monifu" %%% "minitest" % "0.2" % "test"
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
+NOTE: At this point it is compiled for Scala.js
+[milestone 0.6.0-M2](http://www.scala-js.org/news/2014/12/05/announcing-scalajs-0.6.0-M2/),
+and won't work with the stable `0.5.x`.
+
 ## Tutorial
 
 Test suites MUST BE objects, not classes. To create a simple test suite, it could
@@ -88,7 +92,7 @@ object MyTestSuite extends TestSuite[Int] {
 }
 ```
 
-That all you need to know.
+That's all you need to know.
 
 ## License
 
