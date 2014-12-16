@@ -74,7 +74,7 @@ object Result {
     case ex: ExpectationException =>
       Result.Failure(ex.message, Some(ex), Some(ErrorLocation(ex.path, ex.line)))
     case ex: UnexpectedException =>
-      Result.Exception(ex.raison, Some(ErrorLocation(ex.path, ex.line)))
+      Result.Exception(ex.reason, Some(ErrorLocation(ex.path, ex.line)))
     case other =>
       Result.Exception(other, None)
   }
