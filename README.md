@@ -5,4 +5,90 @@ A mini testing framework for Scala, cross-compiled for
 
 ## Usage
 
+```scala
+libraryDependencies += "org.monifu" %% "minitest" % "0.1"
+
+testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
+```
+
 ## Tutorial
+
+Test suites MUST BE objects, not classes. To create a simple test suite, it could
+inherit from [SimpleTestSuite](shared/main/scala/minitest/SimpleTestSuite.scala):
+
+Here's a simple test:
+
+```scala
+import minitest.SimpleTestSuite
+
+object MySimpleSuite extends SimpleTestSuite {
+  test("should be") {
+    expect(1 + 1).toBe(2)
+  }
+
+  test("should not be") {
+    expect(1 + 1).toNotBe(3)
+  }
+
+  test("should be true") {
+    expect(1 + 1 == 2).toBeTrue
+  }
+
+  test("should be false") {
+    expect(1 + 1 == 3).toBeFalse
+  }
+
+  test("should throw") {
+    class DummyException extends RuntimeException("DUMMY")
+    def test(): String = throw new DummyException
+
+    expect(test()).toThrow[DummyException]
+  }
+}
+```
+
+In case you want to setup an environment for each test and need `setup` and
+`tearDown` semantics, you could inherit from
+[TestSuite](shared/main/scala/minitest/TestSuite.scala). Then on each `test` definition,
+you'll receive a fresh value:
+
+```scala
+import minitest.TestSuite
+
+object MyTestSuite extends TestSuite[Int] {
+  def setup(): Int = {
+    Random.nextInt(100) + 1
+  }
+
+  def tearDown(env: Int): Unit = {
+    expect(env > 0).toBe(true)
+  }
+
+  test("should be") { env =>
+    expect(env).toBe(env)
+  }
+
+  test("should not be") { env =>
+    expect(env + 1).toNotBe(env)
+  }
+
+  test("should be true") { env =>
+    expect(env == env).toBeTrue
+  }
+
+  test("should be false") { env =>
+    expect(env == 0).toBeFalse
+  }
+}
+```
+
+That all you need to know.
+
+## License
+
+All code in this repository is licensed under the Apache License, Version 2.0.
+See [LICENCE.txt](./LICENSE.txt).
+
+Copyright &copy; 2014 Alexandru Nedelcu
+
+
