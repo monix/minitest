@@ -1,14 +1,18 @@
 # MiniTest
 
-A mini testing framework for Scala, cross-compiled for
-[Scala.js](http://www.scala-js.org/) (currently `0.6.0-M2`).
+A mini testing framework for Scala 2.11,
+cross-compiled for [Scala.js](http://www.scala-js.org/).
+
+NOTE: At this point it is compiled for Scala.js
+[milestone 0.6.0-M2](http://www.scala-js.org/news/2014/12/05/announcing-scalajs-0.6.0-M2/),
+and won't work with the stable `0.5.x`.
 
 ## Usage in SBT
 
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.3"
+libraryDependencies += "org.monifu" %% "minitest" % "0.4"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -16,14 +20,10 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 For Scala.js, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %%% "minitest" % "0.3" % "test"
+libraryDependencies += "org.monifu" %%% "minitest" % "0.4" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
-
-NOTE: At this point it is compiled for Scala.js
-[milestone 0.6.0-M2](http://www.scala-js.org/news/2014/12/05/announcing-scalajs-0.6.0-M2/),
-and won't work with the stable `0.5.x`.
 
 ## Tutorial
 
@@ -33,9 +33,9 @@ inherit from [SimpleTestSuite](shared/main/scala/minitest/SimpleTestSuite.scala)
 Here's a simple test:
 
 ```scala
-import minitest.SimpleTestSuite
+import minitest._
 
-object MySimpleSuite extends SimpleTestSuite {
+object MySimpleSuite extends SimpleTestSuite with Expectations {
   test("should be") {
     expect(1 + 1).toBe(2)
   }
@@ -69,7 +69,7 @@ you'll receive a fresh value:
 ```scala
 import minitest.TestSuite
 
-object MyTestSuite extends TestSuite[Int] {
+object MyTestSuite extends TestSuite[Int] with Expectations {
   def setup(): Int = {
     Random.nextInt(100) + 1
   }
