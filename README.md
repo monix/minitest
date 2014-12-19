@@ -12,7 +12,7 @@ and won't work with the stable `0.5.x`.
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.4"
+libraryDependencies += "org.monifu" %% "minitest" % "0.4" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
