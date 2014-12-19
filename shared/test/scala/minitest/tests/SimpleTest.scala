@@ -1,8 +1,8 @@
 package minitest.tests
 
-import minitest.SimpleTestSuite
+import minitest.{Expectations, SimpleTestSuite}
 
-object SimpleTest extends SimpleTestSuite {
+object SimpleTest extends SimpleTestSuite with Expectations {
   test("should be") {
     expect(1 + 1).toBe(2)
   }

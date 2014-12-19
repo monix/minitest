@@ -2,7 +2,7 @@ package minitest
 
 import minitest.api.{Properties, Property, TestSuite => Base}
 
-abstract class SimpleTestSuite extends Base {
+trait SimpleTestSuite extends Base {
   def test(name: String)(f: => Unit): Unit =
     synchronized {
       assert(!isInitialized, "Cannot define new tests after TestSuite was initialized")

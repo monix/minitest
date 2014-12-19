@@ -10,9 +10,7 @@ object Build extends SbtBuild {
     organization := "org.monifu",
 
     scalaVersion := "2.11.4",
-    crossScalaVersions := Seq("2.11.4", "2.10.4"),
     publishArtifactsAction := PgpKeys.publishSigned.value,
-    crossBuild := true,
 
     // -- Settings meant for deployment on oss.sonatype.org
 

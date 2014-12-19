@@ -1,9 +1,9 @@
 package minitest.tests
 
-import minitest.TestSuite
+import minitest.{Expectations, TestSuite}
 import scala.util.Random
 
-object EnvironmentTest extends TestSuite[Int] {
+object EnvironmentTest extends TestSuite[Int] with Expectations {
   def setup(): Int = {
     Random.nextInt(100) + 1
   }
