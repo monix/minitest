@@ -14,18 +14,17 @@ case class Properties[I](
       Property[Unit, Unit](property.name, { ignore =>
         try {
           val env = setup()
-          var thrownError = true
-
-          try {
-            val result = property(env)
-            thrownError = false
-            result
+          val result = try property(env) catch {
+            case NonFatal(ex) =>
+              Result.from(ex)
           }
-          finally {
-            if (thrownError)
+
+          result match {
+            case Result.Success(_) =>
+              Property.from(property.name, tearDown)(env)
+            case error =>
               silent(tearDown(env))
-            else
-              tearDown(env)
+              error
           }
         }
         catch {

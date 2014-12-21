@@ -12,6 +12,10 @@ object EnvironmentTest extends TestSuite[Int] with Expectations {
     expect(env > 0).toBe(true)
   }
 
+  test("should fail") { env =>
+    expect(1).toBe(1)
+  }
+
   test("should be") { env =>
     expect(env).toBe(env)
   }
