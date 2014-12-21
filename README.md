@@ -12,7 +12,7 @@ and won't work with the stable `0.5.x`.
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.4" % "test"
+libraryDependencies += "org.monifu" %% "minitest" % "0.5" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -20,7 +20,7 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 For Scala.js, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %%% "minitest" % "0.4" % "test"
+libraryDependencies += "org.monifu" %%% "minitest" % "0.5" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -100,5 +100,3 @@ All code in this repository is licensed under the Apache License, Version 2.0.
 See [LICENCE](./LICENSE).
 
 Copyright &copy; 2014 Alexandru Nedelcu
-
-
