@@ -3,16 +3,15 @@
 A mini testing framework for Scala 2.11,
 cross-compiled for [Scala.js](http://www.scala-js.org/).
 
-NOTE: At this point it is compiled for Scala.js
-[milestone 0.6.0-M2](http://www.scala-js.org/news/2014/12/05/announcing-scalajs-0.6.0-M2/),
-and won't work with the stable `0.5.x`.
+NOTE: At this point it is compiled for Scala.js milestone 0.6.0-M3 and will
+not work with previous versions.
 
 ## Usage in SBT
 
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.5" % "test"
+libraryDependencies += "org.monifu" %% "minitest" % "0.6" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -20,7 +19,7 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 For Scala.js, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %%% "minitest" % "0.5" % "test"
+libraryDependencies += "org.monifu" %%% "minitest" % "0.6" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
