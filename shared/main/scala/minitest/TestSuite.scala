@@ -1,8 +1,8 @@
 package minitest
 
-import minitest.api.{TestSuite => Base, Expectation, Properties, Property}
+import minitest.api.{Asserts, AbstractTestSuite, Properties, Property}
 
-trait TestSuite[Env] extends Base {
+trait TestSuite[Env] extends AbstractTestSuite with Asserts {
   def setup(): Env
   def tearDown(env: Env): Unit
 

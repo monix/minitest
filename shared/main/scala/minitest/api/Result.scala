@@ -2,7 +2,7 @@ package minitest.api
 
 import scala.util.control.NonFatal
 import scala.compat.Platform.EOL
-import scala.Console.{GREEN, RED}
+import scala.Console.{GREEN, RED, YELLOW}
 
 sealed trait Result[+T] {
   def formatted(name: String): String
@@ -37,17 +37,41 @@ object Result {
     }
   }
 
-  case class Failure(msg: String, source: Option[Throwable], location: Option[ErrorLocation])
+  case class Ignored(reason: Option[String], location: Option[SourceLocation]) extends Result[Nothing] {
+    def formatted(name: String): String = {
+      val reasonWithLocation = reason.map { msg =>
+        val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
+        YELLOW + "  " + string + EOL
+      }
+
+      YELLOW + "- " + name + " !!! IGNORED !!!" + EOL +
+      reasonWithLocation.getOrElse("")
+    }
+  }
+
+  case class Canceled(reason: Option[String], location: Option[SourceLocation]) extends Result[Nothing] {
+    def formatted(name: String): String = {
+      val reasonWithLocation = reason.map { msg =>
+        val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
+        YELLOW + "  " + string + EOL
+      }
+
+      YELLOW + "- " + name + " !!! CANCELED !!!" + EOL +
+      reasonWithLocation.getOrElse("")
+    }
+  }
+
+  case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
     extends Result[Nothing] {
     
     def formatted(name: String): String = {
-      val message = msg + location.fold("")(l => s" (${l.file}:${l.line})")
+      val message = msg + location.fold("")(l => s" (${l.path}:${l.line})")
       RED + s"- $name *** FAILED ***" + EOL +
       RED +  "  " + message + EOL
     }
   }
 
-  case class Exception(source: Throwable, location: Option[ErrorLocation])
+  case class Exception(source: Throwable, location: Option[SourceLocation])
     extends Result[Nothing] {
     
     def formatted(name: String): String = {
@@ -56,7 +80,7 @@ object Result {
         val className = name.substring(name.lastIndexOf(".") + 1)
         val msg = Option(source.getMessage).filterNot(_.isEmpty)
           .fold(className)(m => s"$className: $m")
-        location.fold(msg)(l => s"$msg (${l.file}:${l.line})")
+        location.fold(msg)(l => s"$msg (${l.path}:${l.line})")
       }
 
       val stackTrace = {
@@ -71,10 +95,14 @@ object Result {
   }
 
   def from(error: Throwable) = error match {
-    case ex: ExpectationException =>
-      Result.Failure(ex.message, Some(ex), Some(ErrorLocation(ex.path, ex.line)))
+    case ex: AssertionException =>
+      Result.Failure(ex.message, Some(ex), Some(ex.location))
     case ex: UnexpectedException =>
-      Result.Exception(ex.reason, Some(ErrorLocation(ex.path, ex.line)))
+      Result.Exception(ex.reason, Some(ex.location))
+    case ex: IgnoredException =>
+      Result.Ignored(ex.reason, ex.location)
+    case ex: CanceledException =>
+      Result.Canceled(ex.reason, ex.location)
     case other =>
       Result.Exception(other, None)
   }
