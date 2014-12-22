@@ -1,6 +1,6 @@
 package minitest.runner
 
-import minitest.api.{Result, TestSuite}
+import minitest.api.{Result, AbstractTestSuite}
 import org.scalajs.testinterface.TestUtils
 import sbt.testing.{Task => BaseTask, _}
 import scala.util.Try
@@ -33,9 +33,9 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
     Array.empty
   }
 
-  def loadSuite(name: String, loader: ClassLoader): Option[TestSuite] = {
+  def loadSuite(name: String, loader: ClassLoader): Option[AbstractTestSuite] = {
     Try(TestUtils.loadModule(name, loader)).toOption
-      .collect { case ref: TestSuite => ref }
+      .collect { case ref: AbstractTestSuite => ref }
   }
 
   def event(result: Result[Unit], durationMillis: Long): Event = new Event {
@@ -60,6 +60,10 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
           Status.Failure
         case Result.Success(_) =>
           Status.Success
+        case Result.Ignored(_,_) =>
+          Status.Ignored
+        case Result.Canceled(_,_) =>
+          Status.Canceled
       }
 
     def selector(): Selector = {

@@ -1,48 +1,52 @@
 package minitest.tests
 
-import minitest.{Expectations, SimpleTestSuite}
+import minitest.SimpleTestSuite
+import minitest.api.AssertionException
 
-object SimpleTest extends SimpleTestSuite with Expectations {
-  test("should be") {
-    expect(1 + 1).toBe(2)
+object SimpleTest extends SimpleTestSuite {
+  test("ignored test") {
+    ignore()
   }
 
-  test("should not be") {
-    expect(1 + 1).toNotBe(3)
+  test("ignore test with reason") {
+    ignore("test was ignored with a message")
   }
 
-  test("should be true") {
-    expect(1 + 1 == 2).toBeTrue
+  test("canceled test") {
+    cancel()
   }
 
-  test("should be false") {
-    expect(1 + 1 == 3).toBeFalse
+  test("canceled test with reason") {
+    cancel("test was canceled with a message")
   }
 
-  test("should be null") {
-    val s: String = null
-    expect(s).toBeNull
+  test("simple assert") {
+    def hello: String = "hello"
+    assert(hello == "hello")
   }
 
-  test("shouldn't be null") {
-    val s: String = "s"
-    expect(s).toNotBeNull
+  test("assert result without message") {
+    assertResult("hello world") {
+      "hello" + " world"
+    }
   }
 
-  test("should throw") {
-    class DummyException extends RuntimeException("DUMMY")
-    def test(): String = throw new DummyException
-
-    expect(test()).toThrow[DummyException]
+  test("assert result with message") {
+    assertResult("hello world", "expecting hello failed ({0} != {1})") {
+      "hello" + " world"
+    }
   }
 
-  test("should be instance of thing") {
-    case class Thing(v: Int)
-    expect(Thing(1)).toBeInstanceOf[Thing]
+  test("assert equals") {
+    assertEquals(2, 1 + 1)
   }
 
-  test("should not be an instance of thing") {
-    case class Thing(v: Int)
-    expect(Thing(1)).toNotBeInstanceOf[String]
+  test("intercept") {
+    class DummyException extends RuntimeException
+    def test = 1
+
+    intercept[DummyException] {
+      if (test != 2) throw new DummyException
+    }
   }
 }

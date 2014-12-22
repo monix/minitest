@@ -19,11 +19,11 @@ class Framework extends BaseFramework {
 object Framework {
   /**
    * A fingerprint that searches only for singleton objects
-   * of type [[minitest.api.TestSuite]].
+   * of type [[minitest.api.AbstractTestSuite]].
    */
   object ModuleFingerprint extends SubclassFingerprint {
     val isModule = true
     def requireNoArgConstructor(): Boolean = true
-    def superclassName(): String = "minitest.api.TestSuite"
+    def superclassName(): String = "minitest.api.AbstractTestSuite"
   }
 }
