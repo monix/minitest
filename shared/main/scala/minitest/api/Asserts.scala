@@ -18,7 +18,7 @@ trait Asserts {
   def assertResult[T](expected: T, hint: String)(callback: T): Unit =
     macro Asserts.Macros.assertResultWithHint[T]
 
-  def assertEquals[T](expected: T, received: T): Unit =
+  def assertEquals[T](received: T, expected: T): Unit =
     macro Asserts.Macros.assertEquals[T]
 
   def intercept[E <: Throwable](callback: Unit): Unit =
@@ -94,7 +94,7 @@ object Asserts extends Asserts {
     }
 
     def assertEquals[T : c.WeakTypeTag](c: blackbox.Context)
-        (expected: c.Expr[T], received: c.Expr[T]): c.Expr[Unit] = {
+        (received: c.Expr[T], expected: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
