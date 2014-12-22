@@ -11,7 +11,7 @@ not work with previous versions.
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %% "minitest" % "0.6" % "test"
+libraryDependencies += "org.monifu" %% "minitest" % "0.7" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -19,7 +19,7 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 For Scala.js, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "org.monifu" %%% "minitest" % "0.6" % "test"
+libraryDependencies += "org.monifu" %%% "minitest" % "0.7" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -34,28 +34,28 @@ Here's a simple test:
 ```scala
 import minitest._
 
-object MySimpleSuite extends SimpleTestSuite with Expectations {
+object MySimpleSuite extends SimpleTestSuite {
   test("should be") {
-    expect(1 + 1).toBe(2)
+    assertEquals(2, 1 + 1)
   }
 
   test("should not be") {
-    expect(1 + 1).toNotBe(3)
-  }
-
-  test("should be true") {
-    expect(1 + 1 == 2).toBeTrue
-  }
-
-  test("should be false") {
-    expect(1 + 1 == 3).toBeFalse
+    assert(1 + 1 != 3)
   }
 
   test("should throw") {
     class DummyException extends RuntimeException("DUMMY")
     def test(): String = throw new DummyException
 
-    expect(test()).toThrow[DummyException]
+    intercept[DummyException] {
+      test()
+    }
+  }
+  
+  test("test result of") {
+    assertResult("hello world") {
+      "hello" + " " + "world"
+    }
   }
 }
 ```
@@ -68,25 +68,21 @@ you'll receive a fresh value:
 ```scala
 import minitest.TestSuite
 
-object MyTestSuite extends TestSuite[Int] with Expectations {
+object MyTestSuite extends TestSuite[Int] {
   def setup(): Int = {
     Random.nextInt(100) + 1
   }
 
   def tearDown(env: Int): Unit = {
-    expect(env > 0).toBe(true)
+    assert(env > 0, "should still be positive")
   }
 
   test("should be positive") { env =>
-    expect(env > 0).toBeTrue
+    assert(env > 0, "positive test")
   }
 
   test("should be lower or equal to 100") { env =>
-    expect(env <= 100).toBeTrue
-  }
-
-  test("should do addition") { env =>
-    expect(env + 1).toNotBe(env)
+    assert(env <= 100, s"$env > 100")
   }
 }
 ```
