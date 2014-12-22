@@ -8,7 +8,8 @@ trait TestSuite[Env] extends AbstractTestSuite with Asserts {
 
   def test(name: String)(f: Env => Unit): Unit =
     synchronized {
-      assert(!isInitialized, "Cannot define new tests after TestSuite was initialized")
+      if (isInitialized) throw new AssertionError(
+        "Cannot define new tests after TestSuite was initialized")
       propertiesSeq = propertiesSeq :+ Property.from(name, f)
     }
 

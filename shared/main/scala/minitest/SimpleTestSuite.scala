@@ -5,7 +5,8 @@ import minitest.api.{AbstractTestSuite, Asserts, Properties, Property}
 trait SimpleTestSuite extends AbstractTestSuite with Asserts {
   def test(name: String)(f: => Unit): Unit =
     synchronized {
-      assert(!isInitialized, "Cannot define new tests after TestSuite was initialized")
+      if (isInitialized) throw new AssertionError(
+        "Cannot define new tests after SimpleTestSuite was initialized")
       propertiesSeq = propertiesSeq :+ Property.from[Unit](name, _ => f)
     }
 
