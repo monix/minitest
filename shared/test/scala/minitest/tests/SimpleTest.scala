@@ -41,6 +41,18 @@ object SimpleTest extends SimpleTestSuite {
     assertEquals(2, 1 + 1)
   }
 
+  test("assert equals with nulls") {
+    val s: String = null
+
+    intercept[AssertionException] {
+      assertEquals(s, "dummy")
+    }
+
+    intercept[AssertionException] {
+      assertEquals("dummy", s)
+    }
+  }
+
   test("intercept") {
     class DummyException extends RuntimeException
     def test = 1
