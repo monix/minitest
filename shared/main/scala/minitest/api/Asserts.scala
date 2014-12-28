@@ -245,7 +245,7 @@ object Asserts extends Asserts {
       @tailrec
       def loop(index: Int, acc: String): String =
         if (index >= values.length) acc else {
-          val value = values(index).toString
+          val value = String.valueOf(values(index))
           val newStr = acc.replaceAll(s"[{]$index[}]", value)
           loop(index + 1, newStr)
         }
