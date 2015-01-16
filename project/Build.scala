@@ -25,7 +25,7 @@ object Build extends SbtBuild {
   val baseSettings = releaseSettings ++ Seq(
     organization := "org.monifu",
 
-    scalaVersion := "2.11.4",
+    scalaVersion := "2.11.5",
     publishArtifactsAction := PgpKeys.publishSigned.value,
 
     // -- Settings meant for deployment on oss.sonatype.org
