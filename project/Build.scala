@@ -15,18 +15,17 @@
  */
 
 import com.typesafe.sbt.pgp.PgpKeys
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
 import sbt.{Build => SbtBuild, _}
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import sbtrelease.ReleasePlugin._
-import sbtrelease.ReleasePlugin.ReleaseKeys._
+import sbtrelease.ReleasePlugin.autoImport._
 
 object Build extends SbtBuild {
-  val baseSettings = releaseSettings ++ Seq(
+  val baseSettings = Seq(
     organization := "org.monifu",
 
-    scalaVersion := "2.11.5",
-    publishArtifactsAction := PgpKeys.publishSigned.value,
+    scalaVersion := "2.11.7",
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
 
     // -- Settings meant for deployment on oss.sonatype.org
 
@@ -48,7 +47,7 @@ object Build extends SbtBuild {
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <url>https://www.apache.orsg/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
           </license>
         </licenses>
@@ -66,6 +65,7 @@ object Build extends SbtBuild {
   )
 
   val sharedSettings = baseSettings ++ Seq(
+    name := "minitest",
     unmanagedSourceDirectories in Compile <+= baseDirectory(_ /  "shared" / "main" / "scala"),
     unmanagedSourceDirectories in Test <+= baseDirectory(_ / "shared" / "test" / "scala"),
 
@@ -98,10 +98,21 @@ object Build extends SbtBuild {
       publishArtifact in (Compile, packageBin) := false
     )
 
-  lazy val jvm = project.in(file("jvm"))
-    .settings(sharedSettings : _*)
+  lazy val minitest = crossProject.in(file("."))
+    .settings(sharedSettings: _*)
+    .jvmSettings(
+      libraryDependencies ++= Seq(
+        "org.scala-sbt" % "test-interface" % "1.0",
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      ),
+      testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
+    )
+    .jsSettings(
+      libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion,
+      testFrameworks := Seq(new TestFramework("minitest.runner.Framework")),
+      scalaJSStage in Test := FastOptStage
+    )
 
-  lazy val js = project.in(file("js"))
-    .settings(sharedSettings : _*)
-    .enablePlugins(ScalaJSPlugin)
+  lazy val jvm = minitest.jvm
+  lazy val js = minitest.js
 }

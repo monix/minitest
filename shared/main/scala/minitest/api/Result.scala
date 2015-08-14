@@ -65,9 +65,17 @@ object Result {
     extends Result[Nothing] {
     
     def formatted(name: String): String = {
+      val stackTrace = source.map { ex =>
+        val lst = ex.getStackTrace
+        val ending = if (lst.length > 20) EOL + RED + "    ..." + EOL else EOL
+        val trace = lst.take(20).mkString("", EOL + "    " + RED, ending)
+        RED + "    " + trace
+      }
+
       val message = msg + location.fold("")(l => s" (${l.path}:${l.line})")
       RED + s"- $name *** FAILED ***" + EOL +
-      RED +  "  " + message + EOL
+      RED + "  " + message + EOL +
+      stackTrace.getOrElse("")
     }
   }
 
