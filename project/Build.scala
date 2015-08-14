@@ -91,7 +91,6 @@ object Build extends SbtBuild {
     .aggregate(jvm, js)
     .settings(baseSettings : _*)
     .settings(
-      name := "root",
       publishArtifact := false,
       publishArtifact in (Compile, packageDoc) := false,
       publishArtifact in (Compile, packageSrc) := false,
