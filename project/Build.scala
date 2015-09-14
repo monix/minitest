@@ -25,7 +25,9 @@ object Build extends SbtBuild {
     organization := "org.monifu",
 
     scalaVersion := "2.11.7",
+    crossScalaVersions := Seq("2.11.7", "2.10.5"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseCrossBuild := true,
 
     // -- Settings meant for deployment on oss.sonatype.org
 
@@ -83,7 +85,11 @@ object Build extends SbtBuild {
       Resolver.sonatypeRepo("releases")
     ),
 
-    libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile")
+    libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile"),
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % "1.0.1",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+    )
   )
 
   // -- Root aggregating everything

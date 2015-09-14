@@ -172,16 +172,10 @@ object Asserts extends Asserts {
       import c.universe._
 
       val (pathExpr, lineExpr) = location(c)
-      val conditionRepr: c.Expr[String] = {
-        val paramRep = showCode(condition.tree)
-        val paramRepTree = Literal(Constant(paramRep))
-        c.Expr[String](paramRepTree)
-      }
-
       reify {
         if (!condition.splice)
           throw new AssertionException(
-            "assertion failed: " + conditionRepr.splice,
+            "assertion failed",
             SourceLocation(pathExpr.splice, lineExpr.splice))
       }
     }
