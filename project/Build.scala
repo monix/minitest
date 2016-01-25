@@ -22,7 +22,7 @@ import sbtrelease.ReleasePlugin.autoImport._
 
 object Build extends SbtBuild {
   val baseSettings = Seq(
-    organization := "org.monifu",
+    organization := "io.monix",
 
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.11.7", "2.10.5"),
@@ -45,7 +45,7 @@ object Build extends SbtBuild {
     pomIncludeRepository := { _ => false },
 
     pomExtra :=
-      <url>https://github.com/monifu/minitest/</url>
+      <url>https://github.com/monix/minitest/</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
@@ -54,14 +54,14 @@ object Build extends SbtBuild {
           </license>
         </licenses>
         <scm>
-          <url>git@github.com:monifu/minitest.git</url>
-          <connection>scm:git:git@github.com:monifu/minitest.git</connection>
+          <url>git@github.com:monix/minitest.git</url>
+          <connection>scm:git:git@github.com:monix/minitest.git</connection>
         </scm>
         <developers>
           <developer>
-            <id>alex_ndc</id>
+            <id>alexelcu</id>
             <name>Alexandru Nedelcu</name>
-            <url>https://www.bionicspirit.com/</url>
+            <url>https://bionicspirit.com/</url>
           </developer>
         </developers>
   )
@@ -87,8 +87,8 @@ object Build extends SbtBuild {
 
     libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile"),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % "1.0.1",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+      "org.typelevel" %% "macro-compat" % "1.1.0",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     )
   )
 
