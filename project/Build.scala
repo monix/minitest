@@ -45,7 +45,7 @@ object Build extends SbtBuild {
     pomIncludeRepository := { _ => false },
 
     pomExtra :=
-      <url>https://github.com/monix/minitest/</url>
+      <url>https://github.com/monixio/minitest/</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
