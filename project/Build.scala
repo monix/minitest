@@ -25,7 +25,7 @@ object Build extends SbtBuild {
     organization := "io.monix",
 
     scalaVersion := "2.11.7",
-    crossScalaVersions := Seq("2.11.7", "2.10.5"),
+    crossScalaVersions := Seq("2.11.7", "2.10.6"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     releaseCrossBuild := true,
 
