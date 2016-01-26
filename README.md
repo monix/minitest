@@ -8,15 +8,15 @@ Scala 2.10, 2.11 and [Scala.js 0.6.x](http://www.scala-js.org/).
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "io.monix" %% "minitest" % "0.15" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.16" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
-For Scala.js, in the main `build.sbt`:
+For Scala.js, it's similar:
 
 ```scala
-libraryDependencies += "io.monix" %%% "minitest" % "0.15" % "test"
+libraryDependencies += "io.monix" %%% "minitest" % "0.16" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
