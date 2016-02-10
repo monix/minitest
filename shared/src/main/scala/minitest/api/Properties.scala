@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2014 by Alexandru Nedelcu. Some rights reserved.
+ * Copyright (c) 2014-2016 by Alexandru Nedelcu.
+ * Some rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +17,40 @@
 
 package minitest.api
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 import minitest.api.Utils.silent
 
 case class Properties[I](
   setup: () => I,
   tearDown: I => Unit,
-  properties: Seq[Property[I, Unit]])
-  extends Iterable[Property[Unit, Unit]] {
+  properties: Seq[TestSpec[I, Unit]])
+  (implicit ec: ExecutionContext)
+  extends Iterable[TestSpec[Unit, Unit]] {
 
-  def iterator: Iterator[Property[Unit, Unit]] = {
+  def iterator: Iterator[TestSpec[Unit, Unit]] = {
+    implicit val ec = DefaultExecutionContext
+
     for (property <- properties.iterator) yield
-      Property[Unit, Unit](property.name, { ignore =>
+      TestSpec[Unit, Unit](property.name, { ignore =>
         try {
           val env = setup()
           val result = try property(env) catch {
             case NonFatal(ex) =>
-              Result.from(ex)
+              Future.successful(Result.from(ex))
           }
 
-          result match {
+          result.flatMap {
             case Result.Success(_) =>
-              Property.from(property.name, tearDown)(env)
+              TestSpec.from(property.name, tearDown)(ec)(env)
             case error =>
               silent(tearDown(env))
-              error
+              Future.successful(error)
           }
         }
         catch {
           case NonFatal(ex) =>
-            Result.from(ex)
+            Future.successful(Result.from(ex))
         }
       })
   }

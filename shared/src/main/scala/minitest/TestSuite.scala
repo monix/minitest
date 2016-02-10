@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2014 by Alexandru Nedelcu. Some rights reserved.
+ * Copyright (c) 2014-2016 by Alexandru Nedelcu.
+ * Some rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +17,26 @@
 
 package minitest
 
-import minitest.api.{Asserts, AbstractTestSuite, Properties, Property}
+import minitest.api._
 
 trait TestSuite[Env] extends AbstractTestSuite with Asserts {
   def setup(): Env
   def tearDown(env: Env): Unit
 
-  def test(name: String)(f: Env => Unit): Unit =
+  def test[T : TestBuilder](name: String)(f: Env => T): Unit =
     synchronized {
       if (isInitialized) throw new AssertionError(
         "Cannot define new tests after TestSuite was initialized")
-      propertiesSeq = propertiesSeq :+ Property.from(name, f)
+      propertiesSeq = propertiesSeq :+ implicitly[TestBuilder[T]].build[Env](name, f)
     }
 
   lazy val properties: Properties[_] =
     synchronized {
+      implicit val ec = DefaultExecutionContext
       if (!isInitialized) isInitialized = true
       Properties(setup, tearDown, propertiesSeq)
     }
 
-  private[this] var propertiesSeq = Seq.empty[Property[Env, Unit]]
+  private[this] var propertiesSeq = Seq.empty[TestSpec[Env, Unit]]
   private[this] var isInitialized = false
 }

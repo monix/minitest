@@ -1,33 +1,27 @@
+/*
+ * Copyright (c) 2014-2016 by Alexandru Nedelcu.
+ * Some rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package minitest.api
 
-import scala.util.control.NonFatal
 import scala.compat.Platform.EOL
 import scala.Console.{GREEN, RED, YELLOW}
 
 sealed trait Result[+T] {
   def formatted(name: String): String
-
-  def map[U](f: T => U): Result[U] =
-    this match {
-      case Result.Success(value) =>
-        try Result.Success(f(value)) catch {
-          case NonFatal(ex) =>
-            Result.Exception(ex, None)
-        }
-      case error =>
-        error.asInstanceOf[Result[Nothing]]
-    }
-
-  def flatMap[U](f: T => Result[U]): Result[U] =
-    this match {
-      case Result.Success(value) =>
-        try f(value) catch {
-          case NonFatal(ex) =>
-            Result.Exception(ex, None)
-        }
-      case error =>
-        error.asInstanceOf[Result[Nothing]]
-    }
 }
 
 object Result {
@@ -37,7 +31,9 @@ object Result {
     }
   }
 
-  case class Ignored(reason: Option[String], location: Option[SourceLocation]) extends Result[Nothing] {
+  case class Ignored(reason: Option[String], location: Option[SourceLocation])
+    extends Result[Nothing] {
+
     def formatted(name: String): String = {
       val reasonWithLocation = reason.map { msg =>
         val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
@@ -49,7 +45,9 @@ object Result {
     }
   }
 
-  case class Canceled(reason: Option[String], location: Option[SourceLocation]) extends Result[Nothing] {
+  case class Canceled(reason: Option[String], location: Option[SourceLocation])
+    extends Result[Nothing] {
+
     def formatted(name: String): String = {
       val reasonWithLocation = reason.map { msg =>
         val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
@@ -63,7 +61,7 @@ object Result {
 
   case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
     extends Result[Nothing] {
-    
+
     def formatted(name: String): String = {
       val stackTrace = source.map { ex =>
         val lst = ex.getStackTrace
@@ -81,7 +79,7 @@ object Result {
 
   case class Exception(source: Throwable, location: Option[SourceLocation])
     extends Result[Nothing] {
-    
+
     def formatted(name: String): String = {
       val description = {
         val name = source.getClass.getName
@@ -102,7 +100,7 @@ object Result {
     }
   }
 
-  def from(error: Throwable) = error match {
+  def from(error: Throwable): Result[Nothing] = error match {
     case ex: AssertionException =>
       Result.Failure(ex.message, Some(ex), Some(ex.location))
     case ex: UnexpectedException =>

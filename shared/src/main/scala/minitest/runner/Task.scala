@@ -1,35 +1,67 @@
+/*
+ * Copyright (c) 2014-2016 by Alexandru Nedelcu.
+ * Some rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package minitest.runner
 
-import minitest.api.{Result, AbstractTestSuite}
+import minitest.api._
 import org.scalajs.testinterface.TestUtils
 import sbt.testing.{Task => BaseTask, _}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future, Promise}
 import scala.util.Try
 
 
 final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
+  implicit val ec = DefaultExecutionContext
 
   def tags(): Array[String] = Array.empty
   def taskDef(): TaskDef = task
 
   def execute(eventHandler: EventHandler, loggers: Array[Logger],
     continuation: (Array[BaseTask]) => Unit): Unit = {
-    continuation(execute(eventHandler, loggers))
-  }
 
-  def execute(eventHandler: EventHandler, loggers: Array[Logger]): Array[BaseTask] = {
-    for (suite <- loadSuite(task.fullyQualifiedName(), cl)) {
-      loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
-
-      for (property <- suite.properties) {
+    def loop(props: Iterator[TestSpec[Unit, Unit]]): Future[Unit] = {
+      if (!props.hasNext) unit else {
+        val property = props.next()
         val startTS = System.currentTimeMillis()
-        val result = property(())
-        val endTS = System.currentTimeMillis()
+        val futureResult = property(())
 
-        loggers.foreach(_.info(result.formatted(property.name)))
-        eventHandler.handle(event(result, endTS - startTS))
+        futureResult.flatMap { result =>
+          val endTS = System.currentTimeMillis()
+
+          loggers.foreach(_.info(result.formatted(property.name)))
+          eventHandler.handle(event(result, endTS - startTS))
+          loop(props)
+        }
       }
     }
 
+    val future = loadSuite(task.fullyQualifiedName(), cl).fold(unit) { suite =>
+      loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
+      loop(suite.properties.iterator)
+    }
+
+    future.onComplete(_ => continuation(Array.empty))
+  }
+
+  def execute(eventHandler: EventHandler, loggers: Array[Logger]): Array[BaseTask] = {
+    val p = Promise[Unit]()
+    execute(eventHandler, loggers, _ => p.success(()))
+    Await.result(p.future, Duration.Inf)
     Array.empty
   }
 
@@ -76,4 +108,6 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
     def duration(): Long =
       durationMillis
   }
+
+  private[this] val unit = Future.successful(())
 }

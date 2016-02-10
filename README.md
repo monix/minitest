@@ -8,7 +8,7 @@ Scala 2.10, 2.11 and [Scala.js 0.6.x](http://www.scala-js.org/).
 For the JVM, in the main `build.sbt`:
 
 ```scala
-libraryDependencies += "io.monix" %% "minitest" % "0.16" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.17" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -16,7 +16,7 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 For Scala.js, it's similar:
 
 ```scala
-libraryDependencies += "io.monix" %%% "minitest" % "0.16" % "test"
+libraryDependencies += "io.monix" %%% "minitest" % "0.17" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -84,6 +84,22 @@ object MyTestSuite extends TestSuite[Int] {
 }
 ```
 
+Minitest also supports asynchronous results in tests, just return a `Future[Unit]`:
+
+```scala
+import scala.concurrent.ExecutionContext.Implicits.global
+
+object MySimpleSuite extends SimpleTestSuite {
+  test("asynchronous execution") {
+    val future = Future(100).map(_+1)
+    
+    for (result <- future) yield {
+      assertEquals(result, 101)
+    }
+  }
+}
+```
+
 That's all you need to know.
 
 ## License
@@ -91,4 +107,4 @@ That's all you need to know.
 All code in this repository is licensed under the Apache License, Version 2.0.
 See [LICENCE](./LICENSE).
 
-Copyright &copy; 2014 Alexandru Nedelcu
+Copyright &copy; 2014-2016 Alexandru Nedelcu
