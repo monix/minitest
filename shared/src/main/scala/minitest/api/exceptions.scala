@@ -34,6 +34,9 @@ final class IgnoredException(val reason: Option[String], val location: Option[So
 final class CanceledException(val reason: Option[String], val location: Option[SourceLocation])
   extends MiniTestException(reason.orNull, null)
 
+final class InterceptException(val message: String, val location: SourceLocation)
+  extends MiniTestException(message, null)
+
 object OurException {
   /**
    * Utility for pattern matching.

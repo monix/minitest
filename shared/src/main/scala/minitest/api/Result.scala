@@ -35,13 +35,8 @@ object Result {
     extends Result[Nothing] {
 
     def formatted(name: String): String = {
-      val reasonWithLocation = reason.map { msg =>
-        val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
-        YELLOW + "  " + string + EOL
-      }
-
-      YELLOW + "- " + name + " !!! IGNORED !!!" + EOL +
-      reasonWithLocation.getOrElse("")
+      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
+      YELLOW + "- " + name + " !!! IGNORED !!!" + EOL + reasonStr
     }
   }
 
@@ -49,32 +44,16 @@ object Result {
     extends Result[Nothing] {
 
     def formatted(name: String): String = {
-      val reasonWithLocation = reason.map { msg =>
-        val string = msg + location.fold("")(l => s" (${l.path}:${l.line})")
-        YELLOW + "  " + string + EOL
-      }
-
-      YELLOW + "- " + name + " !!! CANCELED !!!" + EOL +
-      reasonWithLocation.getOrElse("")
+      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
+      YELLOW + "- " + name + " !!! CANCELED !!!" + EOL + reasonStr
     }
   }
 
   case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
     extends Result[Nothing] {
 
-    def formatted(name: String): String = {
-      val stackTrace = source.map { ex =>
-        val lst = ex.getStackTrace
-        val ending = if (lst.length > 20) EOL + RED + "    ..." + EOL else EOL
-        val trace = lst.take(20).mkString("", EOL + "    " + RED, ending)
-        RED + "    " + trace
-      }
-
-      val message = msg + location.fold("")(l => s" (${l.path}:${l.line})")
-      RED + s"- $name *** FAILED ***" + EOL +
-      RED + "  " + message + EOL +
-      stackTrace.getOrElse("")
-    }
+    def formatted(name: String): String =
+      formatError(name, msg, source, location, Some(20))
   }
 
   case class Exception(source: Throwable, location: Option[SourceLocation])
@@ -84,19 +63,11 @@ object Result {
       val description = {
         val name = source.getClass.getName
         val className = name.substring(name.lastIndexOf(".") + 1)
-        val msg = Option(source.getMessage).filterNot(_.isEmpty)
+        Option(source.getMessage).filterNot(_.isEmpty)
           .fold(className)(m => s"$className: $m")
-        location.fold(msg)(l => s"$msg (${l.path}:${l.line})")
       }
 
-      val stackTrace = {
-        val lst = source.getStackTrace
-        val ending = if (lst.length > 20) EOL + RED + "    ..." + EOL else EOL
-        lst.take(20).mkString("", EOL + "    " + RED, ending)
-      }
-
-      s"$RED- $name *** FAILED ***$EOL$RED  $description$EOL$RED" +
-      s"$RED    $stackTrace"
+      formatError(name, description, Some(source), location, None)
     }
   }
 
@@ -111,5 +82,46 @@ object Result {
       Result.Canceled(ex.reason, ex.location)
     case other =>
       Result.Exception(other, None)
+  }
+
+  private def formatError(name: String, msg: String,
+    source: Option[Throwable],
+    location: Option[SourceLocation],
+    traceLimit: Option[Int]): String = {
+
+    val stackTrace = source.fold("") { ex =>
+      val trace: Array[String] = {
+        val tr = ex.getStackTrace.map(_.toString)
+        traceLimit.fold(tr) { limit =>
+          if (tr.length <= limit) tr else
+            tr.take(limit) :+ "..."
+        }
+      }
+
+      formatDescription(trace.mkString("\n"), None, RED, "    ")
+    }
+
+    val formattedMessage = formatDescription(
+      if (msg != null && msg.nonEmpty) msg else "Test failed",
+      location, RED, "  "
+    )
+
+    RED + s"- $name *** FAILED ***" + EOL +
+      formattedMessage + stackTrace
+  }
+
+  private def formatDescription(message: String, location: Option[SourceLocation],
+    color: String, prefix: String): String = {
+
+    val lines = message.split("\\r?\\n").zipWithIndex.map { case (line, index) =>
+      if (index == 0)
+        color + prefix + line +
+          location.fold("")(l => s" (${l.path}:${l.line})") +
+          EOL
+      else
+        color + prefix + line + EOL
+    }
+
+    lines.mkString
   }
 }

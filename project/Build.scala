@@ -16,6 +16,7 @@
  */
 
 import com.typesafe.sbt.pgp.PgpKeys
+import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
 import sbt.{Build => SbtBuild, _}
@@ -24,7 +25,6 @@ import sbtrelease.ReleasePlugin.autoImport._
 object Build extends SbtBuild {
   val baseSettings = Seq(
     organization := "io.monix",
-
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.11.7", "2.10.6"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -68,9 +68,8 @@ object Build extends SbtBuild {
   )
 
   val sharedSettings = baseSettings ++ Seq(
-    name := "minitest",
-    unmanagedSourceDirectories in Compile <+= baseDirectory(_ /  "shared" / "main" / "scala"),
-    unmanagedSourceDirectories in Test <+= baseDirectory(_ / "shared" / "test" / "scala"),
+    unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
+    unmanagedSourceDirectories in Test <+= baseDirectory(_.getParentFile / "shared" / "src" / "test" / "scala"),
 
     scalacOptions <<= baseDirectory.map { bd => Seq("-sourcepath", bd.getAbsolutePath) },
 
@@ -90,13 +89,19 @@ object Build extends SbtBuild {
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % "1.1.0",
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-    )
+    ),
+
+    testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
   )
 
-  // -- Root aggregating everything
-  lazy val root = project.in(file("."))
-    .aggregate(jvm, js)
-    .settings(baseSettings : _*)
+  lazy val scalaJSSettings = Seq(
+    scalaJSStage in Test := FastOptStage,
+    scalaJSUseRhino in Global := false
+  )
+
+  lazy val minitest = project.in(file("."))
+    .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
+    .settings(baseSettings)
     .settings(
       publishArtifact := false,
       publishArtifact in (Compile, packageDoc) := false,
@@ -104,21 +109,40 @@ object Build extends SbtBuild {
       publishArtifact in (Compile, packageBin) := false
     )
 
-  lazy val minitest = crossProject.in(file("."))
-    .settings(sharedSettings: _*)
-    .jvmSettings(
+  lazy val minitestJVM = project.in(file("jvm"))
+    .settings(sharedSettings)
+    .settings(
+      name := "minitest",
       libraryDependencies ++= Seq(
         "org.scala-sbt" % "test-interface" % "1.0",
         "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      ),
-      testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
-    )
-    .jsSettings(
-      libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion,
-      testFrameworks := Seq(new TestFramework("minitest.runner.Framework")),
-      scalaJSStage in Test := FastOptStage
+      ))
+
+  lazy val minitestJS = project.in(file("js"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(sharedSettings)
+    .settings(scalaJSSettings)
+    .settings(
+      name := "minitest",
+      libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
     )
 
-  lazy val jvm = minitest.jvm
-  lazy val js = minitest.js
+  lazy val lawsSettings = Seq(
+    name := "minitest-laws",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %%% "discipline" % "0.4",
+      "org.scalacheck" %%% "scalacheck" % "1.12.5"
+    ))
+
+  lazy val lawsJVM = project.in(file("laws/jvm"))
+    .dependsOn(minitestJVM)
+    .settings(sharedSettings)
+    .settings(lawsSettings)
+
+  lazy val lawsJS = project.in(file("laws/js"))
+    .enablePlugins(ScalaJSPlugin)
+    .dependsOn(minitestJS)
+    .settings(sharedSettings)
+    .settings(scalaJSSettings)
+    .settings(lawsSettings)
 }

@@ -231,20 +231,20 @@ object Asserts extends Asserts {
 
         try {
           callback.splice
-          throw new AssertionException(s"expected a $name to be thrown",
-            SourceLocation(path, line))
+          throw new InterceptException(s"expected a $name to be thrown", SourceLocation(path, line))
         }
         catch {
+          case ex: InterceptException =>
+            throw new AssertionException(ex.message, ex.location)
           case NonFatal(ex) if ex.isInstanceOf[E] =>
             ()
           case NotOurException(ex) =>
-            throw new UnexpectedException(ex,
-              SourceLocation(path, line))
+            throw new UnexpectedException(ex, SourceLocation(path, line))
         }
       }
     }
 
-    def location(c: blackbox.Context) = {
+    def location(c: blackbox.Context): (c.Expr[String], c.Expr[Int]) = {
       import c.universe._
       val line = c.Expr[Int](Literal(Constant(c.enclosingPosition.line)))
       val fileName = c.enclosingPosition.source.file.file.getName
@@ -252,7 +252,7 @@ object Asserts extends Asserts {
       (path, line)
     }
 
-    def format(tpl: String, values: Any*) = {
+    def format(tpl: String, values: Any*): String = {
       @tailrec
       def loop(index: Int, acc: String): String =
         if (index >= values.length) acc else {
