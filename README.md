@@ -1,4 +1,4 @@
-# MiniTest
+# Minitest
 
 A mini testing framework cross-compiled for
 Scala 2.10, 2.11 and [Scala.js 0.6.x](http://www.scala-js.org/).
