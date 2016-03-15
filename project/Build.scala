@@ -25,8 +25,8 @@ import sbtrelease.ReleasePlugin.autoImport._
 object Build extends SbtBuild {
   val baseSettings = Seq(
     organization := "io.monix",
-    scalaVersion := "2.11.7",
-    crossScalaVersions := Seq("2.11.7", "2.10.6"),
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8", "2.10.6"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     releaseCrossBuild := true,
 
