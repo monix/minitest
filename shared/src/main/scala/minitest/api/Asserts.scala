@@ -17,6 +17,8 @@
 
 package minitest.api
 
+import java.util.regex.Matcher
+
 import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -257,7 +259,7 @@ object Asserts extends Asserts {
       def loop(index: Int, acc: String): String =
         if (index >= values.length) acc else {
           val value = String.valueOf(values(index))
-          val newStr = acc.replaceAll(s"[{]$index[}]", value)
+          val newStr = acc.replaceAll(s"[{]$index[}]", Matcher.quoteReplacement(value))
           loop(index + 1, newStr)
         }
 
