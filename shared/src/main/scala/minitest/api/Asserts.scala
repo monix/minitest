@@ -18,10 +18,9 @@
 package minitest.api
 
 import java.util.regex.Matcher
-
+import minitest.api.compat._
 import scala.annotation.tailrec
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox
 import scala.util.control.NonFatal
 
 trait Asserts {
@@ -64,7 +63,7 @@ trait Asserts {
 
 object Asserts extends Asserts {
   object Macros {
-    def cancel(c: blackbox.Context)(reason: c.Expr[String]): c.Expr[Unit] = {
+    def cancel(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -76,7 +75,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def ignore(c: blackbox.Context)(reason: c.Expr[String]): c.Expr[Unit] = {
+    def ignore(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -88,7 +87,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def fail(c: blackbox.Context)(): c.Expr[Unit] = {
+    def fail(c: Context)(): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -100,7 +99,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def failWithReason(c: blackbox.Context)(reason: c.Expr[String]): c.Expr[Unit] = {
+    def failWithReason(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -112,7 +111,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def assertEquals[T : c.WeakTypeTag](c: blackbox.Context)
+    def assertEquals[T : c.WeakTypeTag](c: Context)
         (received: c.Expr[T], expected: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
@@ -137,7 +136,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def assertResult[T : c.WeakTypeTag](c: blackbox.Context)
+    def assertResult[T : c.WeakTypeTag](c: Context)
         (expected: c.Expr[T])(callback: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
@@ -162,7 +161,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def assertResultWithHint[T : c.WeakTypeTag](c: blackbox.Context)
+    def assertResultWithHint[T : c.WeakTypeTag](c: Context)
         (expected: c.Expr[T], hint: c.Expr[String])(callback: c.Expr[T]): c.Expr[Unit] = {
 
       import c.universe._
@@ -187,7 +186,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def assert(c: blackbox.Context)(condition: c.Expr[Boolean]): c.Expr[Unit] = {
+    def assert(c: Context)(condition: c.Expr[Boolean]): c.Expr[Unit] = {
       import c.universe._
 
       val (pathExpr, lineExpr) = location(c)
@@ -199,7 +198,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def assertWithHint(c: blackbox.Context)(condition: c.Expr[Boolean], hint: c.Expr[String]): c.Expr[Unit] = {
+    def assertWithHint(c: Context)(condition: c.Expr[Boolean], hint: c.Expr[String]): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -219,7 +218,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def intercept[E <: Throwable : c.WeakTypeTag](c: blackbox.Context)(callback: c.Expr[Unit]): c.Expr[Unit] = {
+    def intercept[E <: Throwable : c.WeakTypeTag](c: Context)(callback: c.Expr[Unit]): c.Expr[Unit] = {
       import c.universe._
       val (pathExpr, lineExpr) = location(c)
 
@@ -246,7 +245,7 @@ object Asserts extends Asserts {
       }
     }
 
-    def location(c: blackbox.Context): (c.Expr[String], c.Expr[Int]) = {
+    def location(c: Context): (c.Expr[String], c.Expr[Int]) = {
       import c.universe._
       val line = c.Expr[Int](Literal(Constant(c.enclosingPosition.line)))
       val fileName = c.enclosingPosition.source.file.file.getName

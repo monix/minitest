@@ -66,7 +66,16 @@ lazy val baseSettings = Seq(
       </developers>
 )
 
+lazy val crossVersionSharedSources =
+  Seq(Compile, Test).map { sc =>
+    (unmanagedSourceDirectories in sc) ++= {
+      (unmanagedSourceDirectories in sc ).value.map {
+        dir:File => new File(dir.getPath + "_" + scalaBinaryVersion.value)
+      }
+    }}
+
 lazy val sharedSettings = baseSettings ++ Seq(
+  unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
   unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
   unmanagedSourceDirectories in Test <+= baseDirectory(_.getParentFile / "shared" / "src" / "test" / "scala"),
 
@@ -85,11 +94,6 @@ lazy val sharedSettings = baseSettings ++ Seq(
   ),
 
   libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile"),
-  libraryDependencies ++= Seq(
-    "org.typelevel" %% "macro-compat" % "1.1.1",
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-  ),
-
   testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
 )
 
@@ -110,6 +114,7 @@ lazy val minitest = project.in(file("."))
 
 lazy val minitestJVM = project.in(file("jvm"))
   .settings(sharedSettings)
+  .settings(crossVersionSharedSources)
   .settings(
     name := "minitest",
     libraryDependencies ++= Seq(
@@ -120,6 +125,7 @@ lazy val minitestJVM = project.in(file("jvm"))
 lazy val minitestJS = project.in(file("js"))
   .enablePlugins(ScalaJSPlugin)
   .settings(sharedSettings)
+  .settings(crossVersionSharedSources)
   .settings(scalaJSSettings)
   .settings(
     name := "minitest",
