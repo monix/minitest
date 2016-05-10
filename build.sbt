@@ -25,7 +25,7 @@ import sbtrelease.ReleasePlugin.autoImport._
 lazy val baseSettings = Seq(
   organization := "io.monix",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.10.6"),
+  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.0-M4"),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
 
@@ -74,6 +74,26 @@ lazy val crossVersionSharedSources =
       }
     }}
 
+lazy val scalaLinterOptions =
+  Seq(
+    // Enables linter options
+    "-Xlint:adapted-args", // warn if an argument list is modified to match the receiver
+    "-Xlint:nullary-unit", // warn when nullary methods return Unit
+    "-Xlint:inaccessible", // warn about inaccessible types in method signatures
+    "-Xlint:nullary-override", // warn when non-nullary `def f()' overrides nullary `def f'
+    "-Xlint:infer-any", // warn when a type argument is inferred to be `Any`
+    "-Xlint:missing-interpolator", // a string literal appears to be missing an interpolator id
+    "-Xlint:doc-detached", // a ScalaDoc comment appears to be detached from its element
+    "-Xlint:private-shadow", // a private field (or class parameter) shadows a superclass field
+    "-Xlint:type-parameter-shadow", // a local type parameter shadows a type already in scope
+    "-Xlint:poly-implicit-overload", // parameterized overloaded implicit methods are not visible as view bounds
+    "-Xlint:option-implicit", // Option.apply used implicit view
+    "-Xlint:delayedinit-select", // Selecting member of DelayedInit
+    "-Xlint:by-name-right-associative", // By-name parameter of right associative operator
+    "-Xlint:package-object-classes", // Class or object defined in package object
+    "-Xlint:unsound-match" // Pattern match may not be typesafe
+  )
+
 lazy val sharedSettings = baseSettings ++ Seq(
   unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
   unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
@@ -82,11 +102,21 @@ lazy val sharedSettings = baseSettings ++ Seq(
   scalacOptions <<= baseDirectory.map { bd => Seq("-sourcepath", bd.getAbsolutePath) },
 
   scalacOptions ++= Seq(
-    "-unchecked", "-deprecation", "-feature", "-Xlint", "-target:jvm-1.6",
-    "-Yinline-warnings", "-optimise", "-Ywarn-adapted-args",
-    "-Ywarn-dead-code", "-Ywarn-inaccessible", "-Ywarn-nullary-override",
-    "-Ywarn-nullary-unit", "-Xlog-free-terms"
+    "-unchecked", "-deprecation", "-feature", "-Xlint",
+    "-Ywarn-adapted-args", "-Ywarn-dead-code", "-Ywarn-inaccessible",
+    "-Ywarn-nullary-override", "-Ywarn-nullary-unit",
+    "-Xlog-free-terms"
   ),
+
+  // Version specific options
+  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 12)) =>
+      scalaLinterOptions
+    case Some((2, 11)) =>
+      scalaLinterOptions ++ Seq("-target:jvm-1.6")
+    case _ =>
+      Seq("-target:jvm-1.6")
+  }),
 
   resolvers ++= Seq(
     "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
@@ -135,8 +165,8 @@ lazy val minitestJS = project.in(file("js"))
 lazy val lawsSettings = Seq(
   name := "minitest-laws",
   libraryDependencies ++= Seq(
-    "org.typelevel" %%% "discipline" % "0.4",
-    "org.scalacheck" %%% "scalacheck" % "1.12.5"
+    "org.typelevel" %%% "discipline" % "0.5",
+    "org.scalacheck" %%% "scalacheck" % "1.13.1"
   ))
 
 lazy val lawsJVM = project.in(file("laws/jvm"))
