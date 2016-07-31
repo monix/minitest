@@ -9,7 +9,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "0.22" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.23" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -19,7 +19,7 @@ and [Discipline](https://github.com/typelevel/discipline) integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "0.22" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "0.23" % "test"
 ```
 
 ## Tutorial
@@ -115,19 +115,6 @@ object MyLawsTest extends SimpleTestSuite with Checkers {
   test("addition of integers is transitive") {
     check3((x: Int, y: Int, z: Int) => (x + y) + z == x + (y + z))
   }
-}
-```
-
-Minitest also has integration with [Discipline](https://github.com/typelevel/discipline),
-complementing the ScalaCheck integration:
-
-```scala
-import minitest.SimpleTestSuite
-import minitest.laws.Discipline
-
-object DisciplineTest extends SimpleTestSuite with Discipline {
-  // Test defined Discipline laws
-  checkAll("Int", RingLaws.ring)
 }
 ```
 
