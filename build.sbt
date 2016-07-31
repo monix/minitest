@@ -25,7 +25,7 @@ import sbtrelease.ReleasePlugin.autoImport._
 lazy val baseSettings = Seq(
   organization := "io.monix",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.0-M4"),
+  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.0-M5"),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
 
@@ -55,13 +55,13 @@ lazy val baseSettings = Seq(
       </licenses>
       <scm>
         <url>git@github.com:monix/minitest.git</url>
-        <connection>scm:git:git@github.com:monix/minitest.git</connection>
+        <connection>scm:git:git@github.com:monixio/minitest.git</connection>
       </scm>
       <developers>
         <developer>
           <id>alexelcu</id>
           <name>Alexandru Nedelcu</name>
-          <url>https://bionicspirit.com/</url>
+          <url>https://alexn.org/</url>
         </developer>
       </developers>
 )
@@ -165,8 +165,7 @@ lazy val minitestJS = project.in(file("js"))
 lazy val lawsSettings = Seq(
   name := "minitest-laws",
   libraryDependencies ++= Seq(
-    "org.typelevel" %%% "discipline" % "0.5",
-    "org.scalacheck" %%% "scalacheck" % "1.13.1"
+    "org.scalacheck" %%% "scalacheck" % "1.13.2"
   ))
 
 lazy val lawsJVM = project.in(file("laws/jvm"))
