@@ -31,6 +31,9 @@ lazy val baseSettings = Seq(
 
   // -- Settings meant for deployment on oss.sonatype.org
 
+  useGpg := true,
+  useGpgAgent := true,
+  usePgpKeyHex("2673B174C4071B0E"),
   publishMavenStyle := true,
 
   publishTo := {
