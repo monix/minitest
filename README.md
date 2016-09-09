@@ -1,7 +1,7 @@
 # Minitest
 
-A mini testing framework cross-compiled for
-Scala 2.10, 2.11 and [Scala.js 0.6.x](http://www.scala-js.org/).
+A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12 and
+[Scala.js 0.6.x](http://www.scala-js.org/).
 
 ## Usage in SBT
 
@@ -9,7 +9,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "0.23" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.24" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -19,7 +19,7 @@ and [Discipline](https://github.com/typelevel/discipline) integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "0.23" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "0.24" % "test"
 ```
 
 ## Tutorial

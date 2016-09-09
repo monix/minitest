@@ -1,3 +1,7 @@
+## Version 0.24 (Sep 9, 2016)
+
+- Update Scala to 2.12.0-RC1
+
 ## Version 0.23
 
 - Update Scala.js version to 0.6.11
