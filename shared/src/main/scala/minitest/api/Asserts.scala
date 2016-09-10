@@ -21,7 +21,7 @@ import java.util.regex.Matcher
 import minitest.api.compat._
 import scala.annotation.tailrec
 import scala.language.experimental.macros
-import scala.util.control.NonFatal
+import scala.reflect.macros.whitebox
 
 trait Asserts {
   def assert(condition: Boolean): Unit =
@@ -31,15 +31,15 @@ trait Asserts {
     macro Asserts.Macros.assertWithHint
 
   def assertResult[T](expected: T)(callback: T): Unit =
-    macro Asserts.Macros.assertResult[T]
+    macro Asserts.Macros.assertResult
 
   def assertResult[T](expected: T, hint: String)(callback: T): Unit =
-    macro Asserts.Macros.assertResultWithHint[T]
+    macro Asserts.Macros.assertResultWithHint
 
   def assertEquals[T](received: T, expected: T): Unit =
-    macro Asserts.Macros.assertEquals[T]
+    macro Asserts.Macros.assertEquals
 
-  def intercept[E <: Throwable](callback: Unit): Unit =
+  def intercept[E <: Throwable](callback: => Unit): Unit =
     macro Asserts.Macros.intercept[E]
 
   def cancel(): Unit =
@@ -62,207 +62,283 @@ trait Asserts {
 }
 
 object Asserts extends Asserts {
-  object Macros {
-    def cancel(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+  @macrocompat.bundle class Macros(val c: whitebox.Context) {
+    import c.universe._
 
-      reify {
-        if (1 == 1) throw new CanceledException(
-          Some(reason.splice),
-          Some(SourceLocation(pathExpr.splice, lineExpr.splice))
-        )
-      }
+    def cancel(reason: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
+
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val CanceledExceptionSym = symbolOf[CanceledException]
+      val SomeSym = symbolOf[Some[_]].companion
+
+      q"""
+      if (1 == 1) throw new $CanceledExceptionSym(
+        $SomeSym($reason),
+        $SomeSym($SourceLocationSym($pathExpr, $lineExpr))
+      )
+      """
     }
 
-    def ignore(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+    def ignore(reason: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      reify {
-        if (1 == 1) throw new IgnoredException(
-          Some(reason.splice),
-          Some(SourceLocation(pathExpr.splice, lineExpr.splice))
-        )
-      }
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val IgnoredExceptionSym = symbolOf[IgnoredException]
+      val SomeSym = symbolOf[Some[_]].companion
+
+      q"""
+      if (1 == 1) throw new $IgnoredExceptionSym(
+        $SomeSym($reason),
+        $SomeSym($SourceLocationSym($pathExpr, $lineExpr))
+      )
+      """
     }
 
-    def fail(c: Context)(): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+    def fail(): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      reify {
-        if (1 == 1) throw new AssertionException(
-          "failed",
-          SourceLocation(pathExpr.splice, lineExpr.splice)
-        )
-      }
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val SomeSym = symbolOf[Some[_]].companion
+
+      q"""
+      if (1 == 1) throw new $AssertionExceptionSym(
+        "failed",
+        $SourceLocationSym($pathExpr, $lineExpr)
+      )
+      """
     }
 
-    def failWithReason(c: Context)(reason: c.Expr[String]): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+    def failWithReason(reason: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      reify {
-        if (1 == 1) throw new AssertionException(
-          reason.splice,
-          SourceLocation(pathExpr.splice, lineExpr.splice)
-        )
-      }
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val SomeSym = symbolOf[Some[_]].companion
+
+      q"""
+      if (1 == 1) throw new $AssertionExceptionSym(
+        $reason,
+        $SourceLocationSym($pathExpr, $lineExpr)
+      )
+      """
     }
 
-    def assertEquals[T : c.WeakTypeTag](c: Context)
-        (received: c.Expr[T], expected: c.Expr[T]): c.Expr[Unit] = {
+    def assertEquals(received: Tree, expected: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
+      val AssertsSym = symbolOf[Asserts].companion
 
-      reify {
-        val location = SourceLocation(pathExpr.splice, lineExpr.splice)
-        try {
-          val r = received.splice
-          val e = expected.splice
+      val locationSym = freshTermName(c)("location")
+      val rs = freshTermName(c)("r")
+      val es = freshTermName(c)("e")
+      val ex = freshTermName(c)("ex")
 
-          if (r != e)
-            throw new AssertionException(
-              format("expected {0} != received {1}", e, r),
-              location
+      q"""
+       val $locationSym = $SourceLocationSym($pathExpr, $lineExpr)
+       try {
+         val $rs = $received
+         val $es = $expected
+
+          if ($rs != $es)
+            throw new $AssertionExceptionSym(
+              $AssertsSym.format("expected {0} != received {1}", $rs, $es),
+              $locationSym
             )
         }
         catch {
-          case NotOurException(ex) =>
-            throw new UnexpectedException(ex, location)
+          case _root_.minitest.api.NotOurException($ex) =>
+            throw new $UnexpectedExceptionSym($ex, $locationSym)
         }
-      }
+       """
     }
 
-    def assertResult[T : c.WeakTypeTag](c: Context)
-        (expected: c.Expr[T])(callback: c.Expr[T]): c.Expr[Unit] = {
+    def assertResult(expected: Tree)(callback: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
+      val AssertsSym = symbolOf[Asserts].companion
 
-      reify {
-        val location = SourceLocation(pathExpr.splice, lineExpr.splice)
-        try {
-          val received = callback.splice
-          val test = expected.splice
+      val locationSym = freshTermName(c)("location")
+      val rs = freshTermName(c)("r")
+      val es = freshTermName(c)("e")
+      val ex = freshTermName(c)("ex")
 
-          if (test != received)
-            throw new AssertionException(
-              format("expected {0}, but got {1}", test, received),
-              location
+      q"""
+       val $locationSym = $SourceLocationSym($pathExpr, $lineExpr)
+       try {
+         val $rs = $callback
+         val $es = $expected
+
+          if ($rs != $es)
+            throw new $AssertionExceptionSym(
+              $AssertsSym.format("expected {0} != received {1}", $rs, $es),
+              $locationSym
             )
         }
         catch {
-          case NotOurException(ex) =>
-            throw new UnexpectedException(ex, location)
+          case _root_.minitest.api.NotOurException($ex) =>
+            throw new $UnexpectedExceptionSym($ex, $locationSym)
         }
-      }
+       """
     }
 
-    def assertResultWithHint[T : c.WeakTypeTag](c: Context)
-        (expected: c.Expr[T], hint: c.Expr[String])(callback: c.Expr[T]): c.Expr[Unit] = {
+    def assertResultWithHint(expected: Tree, hint: Tree)(callback: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
+      val AssertsSym = symbolOf[Asserts].companion
 
-      reify {
-        val location = SourceLocation(pathExpr.splice, lineExpr.splice)
-        try {
-          val received = callback.splice
-          val test = expected.splice
+      val locationSym = freshTermName(c)("location")
+      val rs = freshTermName(c)("r")
+      val es = freshTermName(c)("e")
+      val ex = freshTermName(c)("ex")
+      val hintStr = freshTermName(c)("hintStr")
 
-          if (test != received)
-            throw new AssertionException(
-              format(hint.splice, test, received),
-              location
-            )
+      q"""
+       val $locationSym = $SourceLocationSym($pathExpr, $lineExpr)
+       try {
+         val $rs = $callback
+         val $es = $expected
+         val $hintStr = $hint
+
+         if ($rs != $es)
+           throw new $AssertionExceptionSym(
+             $AssertsSym.format($hintStr, $rs, $es),
+             $locationSym
+           )
         }
         catch {
-          case NotOurException(ex) =>
-            throw new UnexpectedException(ex, location)
+          case _root_.minitest.api.NotOurException($ex) =>
+            throw new $UnexpectedExceptionSym($ex, $locationSym)
         }
-      }
+       """
     }
 
-    def assert(c: Context)(condition: c.Expr[Boolean]): c.Expr[Unit] = {
-      import c.universe._
+    def assert(condition: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
-      val (pathExpr, lineExpr) = location(c)
-      reify {
-        if (!condition.splice)
-          throw new AssertionException(
-            "assertion failed",
-            SourceLocation(pathExpr.splice, lineExpr.splice))
-      }
-    }
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
 
-    def assertWithHint(c: Context)(condition: c.Expr[Boolean], hint: c.Expr[String]): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+      val isFalse = freshTermName(c)("isFalse")
+      val locationSym = freshTermName(c)("location")
+      val ex = freshTermName(c)("ex")
 
-      reify {
-        val path = pathExpr.splice
-        val line = lineExpr.splice
+      q"""
+       val $locationSym = $SourceLocationSym($pathExpr, $lineExpr)
+       try {
+         val $isFalse = !$condition
 
-        try if (!condition.splice) {
-          throw new AssertionException(hint.splice,
-            SourceLocation(path, line))
+         if ($isFalse)
+           throw new $AssertionExceptionSym(
+             "assertion failed",
+             $locationSym
+           )
         }
         catch {
-          case NotOurException(ex) =>
-            throw new UnexpectedException(ex,
-              SourceLocation(path, line))
+          case _root_.minitest.api.NotOurException($ex) =>
+            throw new $UnexpectedExceptionSym($ex, $locationSym)
         }
-      }
+       """
     }
 
-    def intercept[E <: Throwable : c.WeakTypeTag](c: Context)(callback: c.Expr[Unit]): c.Expr[Unit] = {
-      import c.universe._
-      val (pathExpr, lineExpr) = location(c)
+    def assertWithHint(condition: Tree, hint: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
+
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
+
+      val isFalse = freshTermName(c)("isFalse")
+      val locationSym = freshTermName(c)("location")
+      val ex = freshTermName(c)("ex")
+      val hintStr = freshTermName(c)("hint")
+
+      q"""
+       val $locationSym = $SourceLocationSym($pathExpr, $lineExpr)
+       try {
+         val $isFalse = !$condition
+         val $hintStr = $hint
+
+         if ($isFalse)
+           throw new $AssertionExceptionSym(
+             $hintStr,
+             $locationSym
+           )
+        }
+        catch {
+          case _root_.minitest.api.NotOurException($ex) =>
+            throw new $UnexpectedExceptionSym($ex, $locationSym)
+        }
+       """
+    }
+
+    def intercept[E <: Throwable : WeakTypeTag](callback: Tree): Tree = {
+      val (pathExpr, lineExpr) = getSourceLocation
 
       val typeTag = weakTypeTag[E]
+      val eSymbol = symbolOf[E]
       val nameExpr = c.Expr[String](Literal(Constant(typeTag.tpe.toString)))
+      val InterceptExceptionSym = symbolOf[InterceptException]
+      val SourceLocationSym = symbolOf[SourceLocation].companion
+      val AssertionExceptionSym = symbolOf[AssertionException]
+      val UnexpectedExceptionSym = symbolOf[UnexpectedException]
 
-      reify {
-        val path = pathExpr.splice
-        val line = lineExpr.splice
-        val name = nameExpr.splice
+      val path = freshTermName(c)("path")
+      val line = freshTermName(c)("line")
+      val name = freshTermName(c)("name")
+      val ex = freshTermName(c)("ex")
 
-        try {
-          callback.splice
-          throw new InterceptException(s"expected a $name to be thrown", SourceLocation(path, line))
-        }
-        catch {
-          case ex: InterceptException =>
-            throw new AssertionException(ex.message, ex.location)
-          case NonFatal(ex) if ex.isInstanceOf[E] =>
-            ()
-          case NotOurException(ex) =>
-            throw new UnexpectedException(ex, SourceLocation(path, line))
-        }
-      }
+      q"""
+       val $path = $pathExpr
+       val $line = $lineExpr
+       val $name = $nameExpr
+
+       try {
+         $callback
+         throw new $InterceptExceptionSym(
+           "expected a " + $name.toString + " to be thrown",
+           $SourceLocationSym($path, $line)
+         )
+       }
+       catch {
+         case $ex: $InterceptExceptionSym =>
+           throw new $AssertionExceptionSym($ex.message, $ex.location)
+         case _root_.scala.util.control.NonFatal($ex) if $ex.isInstanceOf[$eSymbol] =>
+           ()
+         case _root_.minitest.api.NotOurException($ex) =>
+           throw new $UnexpectedExceptionSym($ex, $SourceLocationSym($path, $line))
+       }
+       """
     }
 
-    def location(c: Context): (c.Expr[String], c.Expr[Int]) = {
-      import c.universe._
+    def getSourceLocation: (Expr[String], Expr[Int]) = {
       val line = c.Expr[Int](Literal(Constant(c.enclosingPosition.line)))
       val fileName = c.enclosingPosition.source.file.file.getName
       val path = c.Expr[String](Literal(Constant(fileName)))
       (path, line)
     }
+  }
 
-    def format(tpl: String, values: Any*): String = {
-      @tailrec
-      def loop(index: Int, acc: String): String =
-        if (index >= values.length) acc else {
-          val value = String.valueOf(values(index))
-          val newStr = acc.replaceAll(s"[{]$index[}]", Matcher.quoteReplacement(value))
-          loop(index + 1, newStr)
-        }
+  def format(tpl: String, values: Any*): String = {
+    @tailrec
+    def loop(index: Int, acc: String): String =
+      if (index >= values.length) acc else {
+        val value = String.valueOf(values(index))
+        val newStr = acc.replaceAll(s"[{]$index[}]", Matcher.quoteReplacement(value))
+        loop(index + 1, newStr)
+      }
 
-      loop(0, tpl)
-    }
+    loop(0, tpl)
   }
 }

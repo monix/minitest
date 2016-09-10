@@ -34,7 +34,7 @@ trait TestSuite[Env] extends AbstractTestSuite with Asserts {
     synchronized {
       implicit val ec = DefaultExecutionContext
       if (!isInitialized) isInitialized = true
-      Properties(setup, tearDown, propertiesSeq)
+      Properties(setup _, tearDown, propertiesSeq)
     }
 
   private[this] var propertiesSeq = Seq.empty[TestSpec[Env, Unit]]

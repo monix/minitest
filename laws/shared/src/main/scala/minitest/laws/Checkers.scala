@@ -33,7 +33,8 @@ trait Checkers extends Asserts {
   /** Test a given ScalaCheck `Prop`. */
   def check(prop: Prop, config: Parameters = checkConfig): Unit = {
     val result = Test.check(config, prop)
-    if (!result.passed) fail(Pretty.pretty(result))
+    val reason = Pretty.pretty(result)
+    if (!result.passed) fail(reason)
   }
 
   /** Convert the passed 1-arg function into a property, and check it.

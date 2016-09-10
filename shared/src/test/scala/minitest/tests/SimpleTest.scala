@@ -43,6 +43,11 @@ object SimpleTest extends SimpleTestSuite {
     assert(hello == "hello")
   }
 
+  test("assert with hint") {
+    def hello: String = "hello"
+    assert(hello == "hello", "assertion with hint is failing")
+  }
+
   test("assert result without message") {
     assertResult("hello world") {
       "hello" + " world"
@@ -86,5 +91,35 @@ object SimpleTest extends SimpleTestSuite {
     Future(1).map(_+1).map { result =>
       assertEquals(result, 2)
     }
+  }
+
+  test("intercept failure") {
+    class DummyException extends RuntimeException
+
+    intercept[AssertionException] {
+      intercept[DummyException] {
+        def hello(x: Int) = x + 1
+        if (hello(1) != 2) throw new DummyException
+      }
+    }
+  }
+
+  test("fail()") {
+    def x = 1
+    intercept[AssertionException] { if (x == 1) fail() }
+  }
+
+  test("fail(reason)") {
+    def x = 1
+    val isSuccess = try {
+      if (x == 1) fail("dummy")
+      false
+    }
+    catch {
+      case ex: AssertionException =>
+        ex.message == "dummy"
+    }
+
+    assert(isSuccess)
   }
 }

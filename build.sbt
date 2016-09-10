@@ -135,6 +135,24 @@ lazy val scalaJSSettings = Seq(
   scalaJSUseRhino in Global := false
 )
 
+lazy val requiredMacroCompatDeps = Seq(
+  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, majorVersion)) if majorVersion >= 11 =>
+      Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+        "org.typelevel" %%% "macro-compat" % "1.1.1" % "provided",
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      )
+    case _ =>
+      Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+        "org.typelevel" %%% "macro-compat" % "1.1.1",
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      )
+  }))
+
 lazy val minitest = project.in(file("."))
   .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
   .settings(baseSettings)
@@ -148,6 +166,7 @@ lazy val minitest = project.in(file("."))
 lazy val minitestJVM = project.in(file("jvm"))
   .settings(sharedSettings)
   .settings(crossVersionSharedSources)
+  .settings(requiredMacroCompatDeps)
   .settings(
     name := "minitest",
     libraryDependencies ++= Seq(
@@ -160,6 +179,7 @@ lazy val minitestJS = project.in(file("js"))
   .settings(sharedSettings)
   .settings(crossVersionSharedSources)
   .settings(scalaJSSettings)
+  .settings(requiredMacroCompatDeps)
   .settings(
     name := "minitest",
     libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
