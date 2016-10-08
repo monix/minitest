@@ -1,3 +1,7 @@
+## Version 0.25 (Oct 8, 2016)
+
+- Fix failure messages (reversing "received" with "expected" :)
+
 ## Version 0.24 (Sep 9, 2016)
 
 - Update Scala to 2.12.0-RC1

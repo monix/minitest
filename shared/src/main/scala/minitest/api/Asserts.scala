@@ -146,7 +146,7 @@ object Asserts extends Asserts {
 
           if ($rs != $es)
             throw new $AssertionExceptionSym(
-              $AssertsSym.format("expected {0} != received {1}", $rs, $es),
+              $AssertsSym.format("received {0} != expected {1}", $rs, $es),
               $locationSym
             )
         }
@@ -178,7 +178,7 @@ object Asserts extends Asserts {
 
           if ($rs != $es)
             throw new $AssertionExceptionSym(
-              $AssertsSym.format("expected {0} != received {1}", $rs, $es),
+              $AssertsSym.format("received {0} != expected {1}", $rs, $es),
               $locationSym
             )
         }

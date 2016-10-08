@@ -9,17 +9,17 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "0.24" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.25" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
 In case you want the optional package for [ScalaCheck](https://www.scalacheck.org/)
-and [Discipline](https://github.com/typelevel/discipline) integration:
+integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "0.24" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "0.25" % "test"
 ```
 
 ## Tutorial
