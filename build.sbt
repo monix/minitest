@@ -131,8 +131,7 @@ lazy val sharedSettings = baseSettings ++ Seq(
 )
 
 lazy val scalaJSSettings = Seq(
-  scalaJSStage in Test := FastOptStage,
-  scalaJSUseRhino in Global := false
+  scalaJSStage in Test := FastOptStage
 )
 
 lazy val requiredMacroCompatDeps = Seq(
