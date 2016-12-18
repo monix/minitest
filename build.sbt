@@ -72,8 +72,16 @@ lazy val baseSettings = Seq(
 lazy val crossVersionSharedSources =
   Seq(Compile, Test).map { sc =>
     (unmanagedSourceDirectories in sc) ++= {
-      (unmanagedSourceDirectories in sc ).value.map {
-        dir:File => new File(dir.getPath + "_" + scalaBinaryVersion.value)
+      (unmanagedSourceDirectories in sc ).value.map { dir:File =>
+        val baseVersion =
+          CrossVersion.partialVersion(scalaBinaryVersion.value) match {
+            case Some((major, minor)) =>
+              s"$major.$minor"
+            case _ =>
+              throw new RuntimeException(
+                s"unknown Scala version: ${scalaBinaryVersion.value}")
+          }
+        new File(s"${dir.getPath}_$baseVersion")
       }
     }}
 
