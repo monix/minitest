@@ -9,7 +9,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "0.26" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "0.27" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -19,7 +19,7 @@ integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "0.26" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "0.27" % "test"
 ```
 
 ## Tutorial
