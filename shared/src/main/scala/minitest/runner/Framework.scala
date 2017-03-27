@@ -21,7 +21,7 @@ import minitest.runner.Framework.ModuleFingerprint
 import sbt.testing.{Framework => BaseFramework, _}
 
 class Framework extends BaseFramework {
-  def name(): String = "scala-testkit"
+  def name(): String = "minitest"
 
   def fingerprints(): Array[Fingerprint] =
     Array(ModuleFingerprint)

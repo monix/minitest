@@ -17,9 +17,9 @@
 
 package minitest.api
 
-import scala.scalajs.js.annotation.JSExportDescendentObjects
+import scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
 
-@JSExportDescendentObjects
+@EnableReflectiveInstantiation
 trait AbstractTestSuite {
   def properties: Properties[_]
 }

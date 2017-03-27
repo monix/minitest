@@ -25,7 +25,7 @@ import sbtrelease.ReleasePlugin.autoImport._
 lazy val baseSettings = Seq(
   organization := "io.monix",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.0"),
+  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.1"),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
 
@@ -69,21 +69,20 @@ lazy val baseSettings = Seq(
       </developers>
 )
 
-lazy val crossVersionSharedSources =
+def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
+lazy val crossVersionSharedSources: Seq[Setting[_]] =
   Seq(Compile, Test).map { sc =>
     (unmanagedSourceDirectories in sc) ++= {
-      (unmanagedSourceDirectories in sc ).value.map { dir:File =>
-        val baseVersion =
-          CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-            case Some((major, minor)) =>
-              s"$major.$minor"
-            case _ =>
-              throw new RuntimeException(
-                s"unknown Scala version: ${scalaBinaryVersion.value}")
-          }
-        new File(s"${dir.getPath}_$baseVersion")
+      (unmanagedSourceDirectories in sc).value.map { dir =>
+        scalaPartV.value match {
+          case Some((major, minor)) =>
+            new File(dir.getPath + s"_$major.$minor")
+          case None =>
+            throw new NoSuchElementException("Scala version")
+        }
       }
-    }}
+    }
+  }
 
 lazy val scalaLinterOptions =
   Seq(
@@ -106,11 +105,21 @@ lazy val scalaLinterOptions =
   )
 
 lazy val sharedSettings = baseSettings ++ Seq(
-  unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
-  unmanagedSourceDirectories in Compile <+= baseDirectory(_.getParentFile / "shared" / "src" / "main" / "scala"),
-  unmanagedSourceDirectories in Test <+= baseDirectory(_.getParentFile / "shared" / "src" / "test" / "scala"),
+  unmanagedSourceDirectories in Compile += {
+    baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
+  },
+  unmanagedSourceDirectories in Test += {
+    baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+  },
 
-  scalacOptions <<= baseDirectory.map { bd => Seq("-sourcepath", bd.getAbsolutePath) },
+  scalacOptions in ThisBuild ++= Seq(
+    // Note, this is used by the doc-source-url feature to determine the
+    // relative path of a given source file. If it's not a prefix of a the
+    // absolute path of the source file, the absolute path of that file
+    // will be put into the FILE_SOURCE variable, which is
+    // definitely not what we want.
+    "-sourcepath", file(".").getAbsolutePath.replaceAll("[.]$", "")
+  ),
 
   scalacOptions ++= Seq(
     "-unchecked", "-deprecation", "-feature", "-Xlint",
@@ -134,7 +143,7 @@ lazy val sharedSettings = baseSettings ++ Seq(
     Resolver.sonatypeRepo("releases")
   ),
 
-  libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _ % "compile"),
+  libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided,
   testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
 )
 
@@ -195,7 +204,7 @@ lazy val minitestJS = project.in(file("js"))
 lazy val lawsSettings = Seq(
   name := "minitest-laws",
   libraryDependencies ++= Seq(
-    "org.scalacheck" %%% "scalacheck" % "1.13.4"
+    "org.scalacheck" %%% "scalacheck" % "1.13.5"
   ))
 
 lazy val lawsJVM = project.in(file("laws/jvm"))

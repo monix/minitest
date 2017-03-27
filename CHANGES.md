@@ -1,3 +1,9 @@
+## Version 1.0.0 (Mar 27, 2016)
+
+- Update Scala to 2.12.1
+- Update Scala.js to 0.6.15
+- Update ScalaCheck to 1.13.5
+
 ## Version 0.27 (Nov 2, 2016)
 
 - Update Scala to 2.12.0 (final)
