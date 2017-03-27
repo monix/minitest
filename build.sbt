@@ -143,7 +143,6 @@ lazy val sharedSettings = baseSettings ++ Seq(
     Resolver.sonatypeRepo("releases")
   ),
 
-  libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided,
   testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
 )
 
@@ -152,22 +151,12 @@ lazy val scalaJSSettings = Seq(
 )
 
 lazy val requiredMacroCompatDeps = Seq(
-  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, majorVersion)) if majorVersion >= 11 =>
-      Seq(
-        "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-        "org.typelevel" %%% "macro-compat" % "1.1.1" % "provided",
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-      )
-    case _ =>
-      Seq(
-        "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-        "org.typelevel" %%% "macro-compat" % "1.1.1",
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-      )
-  }))
+  libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
+    "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
+    "org.typelevel" %%% "macro-compat" % "1.1.1",
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)
+  ))
 
 lazy val minitest = project.in(file("."))
   .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)

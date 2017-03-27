@@ -1,3 +1,7 @@
+## Version 1.0.1 (Mar 27, 2016)
+
+- Fix dependencies, adding scala-reflect
+
 ## Version 1.0.0 (Mar 27, 2016)
 
 - Update Scala to 2.12.1
