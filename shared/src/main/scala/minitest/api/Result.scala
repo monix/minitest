@@ -25,13 +25,13 @@ sealed trait Result[+T] {
 }
 
 object Result {
-  case class Success[+T](value: T) extends Result[T] {
+  final case class Success[+T](value: T) extends Result[T] {
     def formatted(name: String): String = {
       GREEN + "- " + name + EOL
     }
   }
 
-  case class Ignored(reason: Option[String], location: Option[SourceLocation])
+  final case class Ignored(reason: Option[String], location: Option[SourceLocation])
     extends Result[Nothing] {
 
     def formatted(name: String): String = {
@@ -40,7 +40,7 @@ object Result {
     }
   }
 
-  case class Canceled(reason: Option[String], location: Option[SourceLocation])
+  final case class Canceled(reason: Option[String], location: Option[SourceLocation])
     extends Result[Nothing] {
 
     def formatted(name: String): String = {
@@ -49,14 +49,14 @@ object Result {
     }
   }
 
-  case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
+  final case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
     extends Result[Nothing] {
 
     def formatted(name: String): String =
       formatError(name, msg, source, location, Some(20))
   }
 
-  case class Exception(source: Throwable, location: Option[SourceLocation])
+  final case class Exception(source: Throwable, location: Option[SourceLocation])
     extends Result[Nothing] {
 
     def formatted(name: String): String = {
@@ -76,6 +76,8 @@ object Result {
       Result.Failure(ex.message, Some(ex), Some(ex.location))
     case ex: UnexpectedException =>
       Result.Exception(ex.reason, Some(ex.location))
+    case ex: InterceptException =>
+      Result.Exception(ex, Some(ex.location))
     case ex: IgnoredException =>
       Result.Ignored(ex.reason, ex.location)
     case ex: CanceledException =>
@@ -110,13 +112,16 @@ object Result {
       formattedMessage + stackTrace
   }
 
-  private def formatDescription(message: String, location: Option[SourceLocation],
-    color: String, prefix: String): String = {
+  private def formatDescription(
+    message: String,
+    location: Option[SourceLocation],
+    color: String,
+    prefix: String): String = {
 
     val lines = message.split("\\r?\\n").zipWithIndex.map { case (line, index) =>
       if (index == 0)
         color + prefix + line +
-          location.fold("")(l => s" (${l.path}:${l.line})") +
+          location.fold("")(l => s" (${l.fileName.getOrElse("none")}:${l.line})") +
           EOL
       else
         color + prefix + line + EOL
