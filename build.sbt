@@ -24,8 +24,8 @@ import sbtrelease.ReleasePlugin.autoImport._
 
 lazy val baseSettings = Seq(
   organization := "io.monix",
-  scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.10.6", "2.12.1"),
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.11.11", "2.10.6", "2.12.2"),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
 
