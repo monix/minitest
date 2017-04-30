@@ -1,8 +1,9 @@
-## Version 1.0.2 (Apr 30, 2016)
+## Version 1.1.0 (Apr 30, 2016)
 
 - Update to Scala 2.11.11 and 2.12.2
 - Update ScalaCheck to 1.13.5
 - Update Scala.js to 0.6.16
+- Make all `Asserts` depend on implicit `SourceLocation`
 
 ## Version 1.0.1 (Mar 27, 2016)
 
