@@ -6,7 +6,7 @@ matrix:
   include:
   - jdk: oraclejdk8
     scala: 2.12.4
-    env: COMMAND=ci-all
+    env: COMMAND=ci-all PUBLISH=true
 env:
   global:
   - TRAVIS_NODE_VERSION="6.10"
