@@ -37,8 +37,5 @@ end
 # Forcing a change to the root directory, if not there already
 Dir.chdir(File.absolute_path(File.join(File.dirname(__FILE__), "..")))
 
-exec("openssl aes-256-cbc -K #{ENV['encrypted_9adc7ded62a2_key']} -iv #{ENV['encrypted_9adc7ded62a2_iv']} -in project/.gnupg/secring.gpg.enc -out project/.gnupg/secring.gpg -d")
-exec("openssl aes-256-cbc -K #{ENV['encrypted_9adc7ded62a2_key']} -iv #{ENV['encrypted_9adc7ded62a2_iv']} -in project/.gnupg/pubring.gpg.enc -out project/.gnupg/pubring.gpg -d")
-
 # Go, go, go
 exec("sbt release")

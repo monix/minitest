@@ -10,9 +10,9 @@ matrix:
 env:
   global:
   - TRAVIS_NODE_VERSION="6.10"
-  - secure: Rz63m4cHWw/zZ4BWCqJQLJRwXDsW6tH7XWKDC8HHRur6H9Vtv1q5c47LnfFmfixT2xR4aqedQbl9WCmFqikE/NlY0XIV+LhY7iFJSMJHfx6/m/1GbUk1XT9qyvEZlhzuGAymS8Ir4wvMgrWjPPXvAQl41HVAflAUq9ZMaG/nYPY=
-  - secure: dCjHqo+mfAKbjYl0j6m5QlfK9AenVYpICShxI9PEghJeVPz1bELVnEcGoqbfXPjy8QUHVeJG+JagCHwQQLGEmoKXSsVNOVKUx3mOAF/I3Q6qrboFa2PQTjUfdNEH6NSYCZfBlbi/lXzRSU8CfBmgbR7NrBCpuC1i1g0rOrdZRvY=
-  - secure: rH2/hPqdWjVfiNC0/929HjpzAdeTgY//BDoQ0FZUe8jf/UJjxvFxwiUTM9PJJ7KkxVJLRzbINPebkpR0kEYpBwdNtinZgk0MAZJbiZC4VSa/rFLP2qt42zW0vrucq2hKvvIy0B0RTtlBnuw3xyoYWVaro5pj85y6dF7etxvVShU=
+  - secure: Vv8crrPrmF5jvgQdXUfjFh8isz9KuECrJGk3nzRyXDQZBNzHxo4fxmaQhOXwhdIOkT0WOQk1oMrqQhptcsEIvuWlDVftijYjcOJY0We+KTTQ5AyGFSc4O2hIn2JClM2N72ua7ZaI4wfeBgEHh1TOFfSWNqgZWnaSIdxyJ7Th2AY=
+  - secure: vRbaa24kUTGmcfyIPJwLF7QrJU5Lk5+WCquz0tPvR4sQvwQDg1mTA0tjXjCXE1z5QSMG5g1CfoieltRbce0QZlXeToxzrgNTRqehEAqbWcvkBB2R9ZhhsVwO+3DG6A+6rEGQ/bB64+62I833UXtEFy1yxfGKeXDuAYf55rVrCVA=
+  - secure: h9EZ3Mq5ott/itLrOTaEozQNsS+X65y8bMVlvN6wBgNjk9qQ9vyw3GJlipHebEGQQs46zV/nyg9xEMKIFfzr4ngtVmouz6QUqvlWhnNFa+3Alx+bwJrNxrMOzqs4Q+66KAKkuDahcpkZIjz7DYBj06+0i9g/8p0QH0gb6/N39Lo=
 install:
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
   && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
@@ -36,3 +36,8 @@ cache:
 before_cache:
 - find $HOME/.sbt -name "*.lock" -type f -delete
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+before_install:
+- openssl aes-256-cbc -K $encrypted_9adc7ded62a2_key -iv $encrypted_9adc7ded62a2_iv
+  -in project/.gnupg/pubring.gpg.enc -out project/.gnupg/pubring.gpg -d
+- openssl aes-256-cbc -K $encrypted_9adc7ded62a2_key -iv $encrypted_9adc7ded62a2_iv
+  -in project/.gnupg/secring.gpg.enc -out project/.gnupg/secring.gpg -d
