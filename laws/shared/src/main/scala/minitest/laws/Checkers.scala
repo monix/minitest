@@ -26,7 +26,9 @@ import org.scalacheck.{Arbitrary, Prop, Shrink, Test}
   *
   * See: https://www.scalacheck.org/
   */
-trait Checkers extends Asserts {
+trait Checkers {
+  import Asserts._
+
   /** ScalaCheck test parameters instance. */
   def checkConfig: Parameters = Test.Parameters.default
 

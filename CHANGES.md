@@ -1,3 +1,10 @@
+## Version 2.0.0 (Nov 10, 2017)
+
+- Simplify API, make it safer with the `Void` for synchronous tests
+  and with `testAsync` for `Future`-enabled tests
+- Enable automatic builds
+- Upgrade Scala and Scala.js versions
+
 ## Version 1.1.0 (Apr 30, 2016)
 
 - Update to Scala 2.11.11 and 2.12.2

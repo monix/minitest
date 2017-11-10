@@ -21,12 +21,11 @@ import minitest.api._
 import org.scalajs.testinterface.TestUtils
 import sbt.testing.{Task => BaseTask, _}
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.Try
 
-
 final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
-  implicit val ec = DefaultExecutionContext
+  implicit val ec: ExecutionContext = DefaultExecutionContext
 
   def tags(): Array[String] = Array.empty
   def taskDef(): TaskDef = task

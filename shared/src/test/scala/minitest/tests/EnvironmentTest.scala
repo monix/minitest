@@ -34,7 +34,7 @@ object EnvironmentTest extends TestSuite[Int] {
     assertEquals(env, env)
   }
 
-  test("asynchronous test") { env =>
+  testAsync("asynchronous test") { env =>
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Future(env).map(_+1).map { result =>

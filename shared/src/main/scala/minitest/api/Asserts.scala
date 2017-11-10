@@ -19,7 +19,6 @@ package minitest.api
 
 import java.util.regex.Matcher
 import scala.annotation.tailrec
-import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 trait Asserts {

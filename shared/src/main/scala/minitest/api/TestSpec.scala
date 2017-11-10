@@ -17,10 +17,9 @@
 
 package minitest.api
 
-import scala.annotation.implicitNotFound
-import scala.concurrent.{ExecutionContext, Promise, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
+import scala.util.{Failure, Success}
 
 case class TestSpec[I, +O](name: String, f: I => Future[Result[O]])
   extends (I => Future[Result[O]]) {
@@ -29,59 +28,42 @@ case class TestSpec[I, +O](name: String, f: I => Future[Result[O]])
 }
 
 object TestSpec {
-  def async[Env,T](name: String, cb: Env => Future[T])
+  def async[Env](name: String, cb: Env => Future[Unit])
     (implicit ec: ExecutionContext): TestSpec[Env, Unit] =
-    TestSpec[Env, Unit](name,  { env =>
-      val p = Promise[Try[T]]()
-      val f = try {
-        cb(env).onComplete(p.success)
-        p.future
-      } catch {
-        case NonFatal(ex) =>
-          Future.failed(ex)
-      }
+    TestSpec(name,  { env =>
+      val f: Future[Unit] =
+        try cb(env)
+        catch { case NonFatal(ex) => Future.failed(ex) }
 
-      f.map {
-        case Success(_) => Result.Success(())
-        case Failure(ex) => Result.from(ex)
+      val p = Promise[Result[Unit]]()
+      f.onComplete {
+        case Success(_) =>
+          p.success(Result.Success(()))
+        case Failure(ex) =>
+          p.success(Result.from(ex))
       }
+      p.future
     })
 
-  def from[Env,T](name: String, cb: Env => T)
-    (implicit ec: ExecutionContext): TestSpec[Env, Unit] =
+  def sync[Env](name: String, cb: Env => Void): TestSpec[Env, Unit] =
     TestSpec(name, { env =>
       try {
-        cb(env)
-        Future.successful(Result.Success(()))
+        cb(env) match {
+          case Void.UnitRef =>
+            Future.successful(Result.Success(()))
+          case Void.Caught(ref, loc) =>
+            Future.successful(unexpected(ref, loc))
+        }
       }
       catch {
         case NonFatal(ex) =>
           Future.successful(Result.from(ex))
       }
     })
+
+  private def unexpected[A](ref: A, loc: SourceLocation): Result[Nothing] =
+    Result.Failure(
+      s"Problem with test spec, expecting `Unit`, but received: $ref ",
+      None, Some(loc)
+    )
 }
-
-@implicitNotFound(
-  "Test must return either Unit or Future[Unit] and not ${T}. In case of " +
-  "Future[Unit] make sure you have an implicit ExecutionContext in scope.")
-trait TestBuilder[-T] {
-  def build[Env](name: String, f: Env => T): TestSpec[Env, Unit]
-}
-
-object TestBuilder {
-  private[this] implicit val ec = DefaultExecutionContext
-
-  implicit val synchronous: TestBuilder[Unit] =
-    new TestBuilder[Unit] {
-      def build[Env](name: String, f: (Env) => Unit): TestSpec[Env, Unit] =
-        TestSpec.from(name, f)
-    }
-
-  implicit val asynchronous: TestBuilder[Future[Unit]] =
-    new TestBuilder[Future[Unit]] {
-      def build[Env](name: String, cb: (Env) => Future[Unit]): TestSpec[Env, Unit] =
-        TestSpec.async(name, cb)
-    }
-}
-
-

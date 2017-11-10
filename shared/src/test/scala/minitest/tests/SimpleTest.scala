@@ -85,7 +85,7 @@ object SimpleTest extends SimpleTestSuite {
     }
   }
 
-  test("asynchronous test") {
+  testAsync("asynchronous test") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Future(1).map(_+1).map { result =>

@@ -23,16 +23,14 @@ import minitest.api.Utils.silent
 
 case class Properties[I](
   setup: () => I,
-  tearDown: I => Unit,
+  tearDown: I => Void,
   properties: Seq[TestSpec[I, Unit]])
   (implicit ec: ExecutionContext)
   extends Iterable[TestSpec[Unit, Unit]] {
 
   def iterator: Iterator[TestSpec[Unit, Unit]] = {
-    implicit val ec = DefaultExecutionContext
-
     for (property <- properties.iterator) yield
-      TestSpec[Unit, Unit](property.name, { ignore =>
+      TestSpec[Unit, Unit](property.name, { _ =>
         try {
           val env = setup()
           val result = try property(env) catch {
@@ -42,7 +40,7 @@ case class Properties[I](
 
           result.flatMap {
             case Result.Success(_) =>
-              TestSpec.from(property.name, tearDown)(ec)(env)
+              TestSpec.sync(property.name, tearDown)(env)
             case error =>
               silent(tearDown(env))
               Future.successful(error)

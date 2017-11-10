@@ -16,7 +16,6 @@
  */
 
 import sbt._
-import com.typesafe.sbt.pgp.PgpKeys
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._

@@ -18,25 +18,39 @@
 package minitest
 
 import minitest.api._
+import scala.concurrent.{ExecutionContext, Future}
 
 trait TestSuite[Env] extends AbstractTestSuite with Asserts {
   def setup(): Env
   def tearDown(env: Env): Unit
 
-  def test[T : TestBuilder](name: String)(f: Env => T): Unit =
+  def test(name: String)(f: Env => Void): Unit =
     synchronized {
-      if (isInitialized) throw new AssertionError(
-        "Cannot define new tests after TestSuite was initialized")
-      propertiesSeq = propertiesSeq :+ implicitly[TestBuilder[T]].build[Env](name, f)
+      if (isInitialized) throw initError()
+      propertiesSeq = propertiesSeq :+
+        TestSpec.sync[Env](name, env => f(env))
+    }
+
+  def testAsync(name: String)(f: Env => Future[Unit]): Unit =
+    synchronized {
+      if (isInitialized) throw initError()
+      propertiesSeq = propertiesSeq :+
+        TestSpec.async[Env](name, f)
     }
 
   lazy val properties: Properties[_] =
     synchronized {
-      implicit val ec = DefaultExecutionContext
       if (!isInitialized) isInitialized = true
-      Properties(setup _, tearDown, propertiesSeq)
+      Properties(setup _, (env: Env) => { tearDown(env); Void.UnitRef }, propertiesSeq)
     }
 
   private[this] var propertiesSeq = Seq.empty[TestSpec[Env, Unit]]
   private[this] var isInitialized = false
+  private[this] implicit lazy val ec: ExecutionContext =
+    DefaultExecutionContext
+
+  private[this] def initError() =
+    new AssertionError(
+      "Cannot define new tests after TestSuite was initialized"
+    )
 }
