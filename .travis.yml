@@ -1,0 +1,38 @@
+language: scala
+sudo: required
+dist: trusty
+group: edge
+matrix:
+  include:
+  - jdk: oraclejdk8
+    scala: 2.12.4
+    env: COMMAND=ci-all
+env:
+  global:
+  - TRAVIS_NODE_VERSION="6.10"
+  - secure: Rz63m4cHWw/zZ4BWCqJQLJRwXDsW6tH7XWKDC8HHRur6H9Vtv1q5c47LnfFmfixT2xR4aqedQbl9WCmFqikE/NlY0XIV+LhY7iFJSMJHfx6/m/1GbUk1XT9qyvEZlhzuGAymS8Ir4wvMgrWjPPXvAQl41HVAflAUq9ZMaG/nYPY=
+  - secure: dCjHqo+mfAKbjYl0j6m5QlfK9AenVYpICShxI9PEghJeVPz1bELVnEcGoqbfXPjy8QUHVeJG+JagCHwQQLGEmoKXSsVNOVKUx3mOAF/I3Q6qrboFa2PQTjUfdNEH6NSYCZfBlbi/lXzRSU8CfBmgbR7NrBCpuC1i1g0rOrdZRvY=
+  - secure: rH2/hPqdWjVfiNC0/929HjpzAdeTgY//BDoQ0FZUe8jf/UJjxvFxwiUTM9PJJ7KkxVJLRzbINPebkpR0kEYpBwdNtinZgk0MAZJbiZC4VSa/rFLP2qt42zW0vrucq2hKvvIy0B0RTtlBnuw3xyoYWVaro5pj85y6dF7etxvVShU=
+install:
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
+  && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
+  install $TRAVIS_NODE_VERSION
+script:
+- sbt -J-Xmx6144m ++$TRAVIS_SCALA_VERSION $COMMAND
+after_success:
+- "./project/publish"
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/f1a7ec8fc9a34c6a9108
+    on_success: change
+    on_failure: always
+    on_start: false
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.coursier/cache"
+  - "$HOME/.sbt"
+before_cache:
+- find $HOME/.sbt -name "*.lock" -type f -delete
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete

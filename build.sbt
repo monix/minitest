@@ -20,22 +20,29 @@ import com.typesafe.sbt.pgp.PgpKeys
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
-import sbtrelease.ReleasePlugin.autoImport._
+import com.typesafe.sbt.GitVersioning
+import scala.xml.Elem
+import scala.xml.transform.{RewriteRule, RuleTransformer}
+
+addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
+addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 
 lazy val baseSettings = Seq(
   organization := "io.monix",
-  scalaVersion := "2.11.11",
-  crossScalaVersions := Seq("2.11.11", "2.10.6", "2.12.2"),
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-  releaseCrossBuild := true,
+  scalaVersion := "2.12.4",
+  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4"),
 
   // -- Settings meant for deployment on oss.sonatype.org
+  sonatypeProfileName := organization.value,
 
-  useGpg := true,
-  useGpgAgent := true,
-  usePgpKeyHex("2673B174C4071B0E"),
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    sys.env.getOrElse("SONATYPE_USER", ""),
+    sys.env.getOrElse("SONATYPE_PASS", "")
+  ),
+
   publishMavenStyle := true,
-
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
@@ -44,29 +51,38 @@ lazy val baseSettings = Seq(
       Some("releases"  at nexus + "service/local/staging/deploy/maven2")
   },
 
+  isSnapshot := version.value endsWith "SNAPSHOT",
   publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false },
+  pomIncludeRepository := { _ => false }, // removes optional dependencies
 
-  pomExtra :=
-    <url>https://github.com/monixio/minitest/</url>
-      <licenses>
-        <license>
-          <name>Apache License, Version 2.0</name>
-          <url>https://www.apache.orsg/licenses/LICENSE-2.0</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-      <scm>
-        <url>git@github.com:monix/minitest.git</url>
-        <connection>scm:git:git@github.com:monixio/minitest.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>alexelcu</id>
-          <name>Alexandru Nedelcu</name>
-          <url>https://alexn.org/</url>
-        </developer>
-      </developers>
+  // For evicting Scoverage out of the generated POM
+  // See: https://github.com/scoverage/sbt-scoverage/issues/153
+  pomPostProcess := { (node: xml.Node) =>
+    new RuleTransformer(new RewriteRule {
+      override def transform(node: xml.Node): Seq[xml.Node] = node match {
+        case e: Elem
+          if e.label == "dependency" && e.child.exists(child => child.label == "groupId" && child.text == "org.scoverage") => Nil
+        case _ => Seq(node)
+      }
+    }).transform(node).head
+  },
+
+  licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  homepage := Some(url("https://github.com/monix/minitest")),
+
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/monix/minitest"),
+      "scm:git@github.com:monix/minitest.git"
+    )),
+
+  developers := List(
+    Developer(
+      id="alexelcu",
+      name="Alexandru Nedelcu",
+      email="noreply@alexn.org",
+      url=url("https://alexn.org")
+    ))
 )
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
@@ -207,3 +223,32 @@ lazy val lawsJS = project.in(file("laws/js"))
   .settings(sharedSettings)
   .settings(scalaJSSettings)
   .settings(lawsSettings)
+
+//------------- For Release
+
+useGpg := false
+usePgpKeyHex("2673B174C4071B0E")
+pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg"
+pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg"
+pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
+
+enablePlugins(GitVersioning)
+
+/* The BaseVersion setting represents the in-development (upcoming) version,
+ * as an alternative to SNAPSHOTS.
+ */
+git.baseVersion := "2.0.0"
+
+val ReleaseTag = """^v(\d+\.\d+\.\d+(?:[-.]\w+)?)$""".r
+git.gitTagToVersionNumber := {
+  case ReleaseTag(v) => Some(v)
+  case _ => None
+}
+
+git.formattedShaVersion := {
+  val suffix = git.makeUncommittedSignifierSuffix(git.gitUncommittedChanges.value, git.uncommittedSignifier.value)
+
+  git.gitHeadCommit.value map { _.substring(0, 7) } map { sha =>
+    git.baseVersion.value + "-" + sha + suffix
+  }
+}

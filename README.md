@@ -3,6 +3,8 @@
 A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12 and
 [Scala.js 0.6.x](http://www.scala-js.org/).
 
+[![Build Status](https://travis-ci.org/monix/minitest.svg?branch=master)](https://travis-ci.org/monix/minitest)
+
 ## Usage in SBT
 
 For `build.sbt` (use the `%%%` operator for Scala.js):
