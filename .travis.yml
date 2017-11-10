@@ -36,8 +36,3 @@ cache:
 before_cache:
 - find $HOME/.sbt -name "*.lock" -type f -delete
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-before_install:
-- openssl aes-256-cbc -K $encrypted_9adc7ded62a2_key -iv $encrypted_9adc7ded62a2_iv
-  -in project/.gnupg/pubring.gpg.enc -out project/.gnupg/pubring.gpg -d
-- openssl aes-256-cbc -K $encrypted_9adc7ded62a2_key -iv $encrypted_9adc7ded62a2_iv
-  -in project/.gnupg/secring.gpg.enc -out project/.gnupg/secring.gpg -d
