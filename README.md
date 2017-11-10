@@ -87,13 +87,14 @@ object MyTestSuite extends TestSuite[Int] {
 }
 ```
 
-Minitest supports asynchronous results in tests, just return a `Future[Unit]`:
+Minitest supports asynchronous results in tests, just use `testAsync` and 
+return a `Future[Unit]`:
 
 ```scala
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MySimpleSuite extends SimpleTestSuite {
-  test("asynchronous execution") {
+  testAsync("asynchronous execution") {
     val future = Future(100).map(_+1)
     
     for (result <- future) yield {
