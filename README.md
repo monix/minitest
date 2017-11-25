@@ -27,7 +27,7 @@ libraryDependencies += "io.monix" %% "minitest-laws" % "2.0.0" % "test"
 ## Tutorial
 
 Test suites MUST BE objects, not classes. To create a simple test suite, it could
-inherit from [SimpleTestSuite](shared/main/scala/minitest/SimpleTestSuite.scala):
+inherit from [SimpleTestSuite](shared/src/main/scala/minitest/SimpleTestSuite.scala):
 
 Here's a simple test:
 
@@ -62,7 +62,7 @@ object MySimpleSuite extends SimpleTestSuite {
 
 In case you want to setup an environment for each test and need `setup` and
 `tearDown` semantics, you could inherit from
-[TestSuite](shared/main/scala/minitest/TestSuite.scala). Then on each `test` definition,
+[TestSuite](shared/src/main/scala/minitest/TestSuite.scala). Then on each `test` definition,
 you'll receive a fresh value:
 
 ```scala
