@@ -36,7 +36,7 @@ trait SimpleTestSuite extends AbstractTestSuite with Asserts {
   lazy val properties: Properties[_] =
     synchronized {
       if (!isInitialized) isInitialized = true
-      Properties[Unit](() => (), _ => Void.UnitRef, propertiesSeq)
+      Properties[Unit](() => (), _ => Void.UnitRef, () => (), () => (), propertiesSeq)
     }
 
   private[this] var propertiesSeq = Seq.empty[TestSpec[Unit, Unit]]

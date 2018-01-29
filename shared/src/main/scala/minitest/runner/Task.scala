@@ -51,7 +51,10 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
 
     val future = loadSuite(task.fullyQualifiedName(), cl).fold(unit) { suite =>
       loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
-      loop(suite.properties.iterator)
+      suite.properties.setupSuite()
+      loop(suite.properties.iterator).map { _ =>
+        suite.properties.tearDownSuite()
+      }
     }
 
     future.onComplete(_ => continuation(Array.empty))

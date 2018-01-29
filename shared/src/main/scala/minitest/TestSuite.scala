@@ -21,6 +21,8 @@ import minitest.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait TestSuite[Env] extends AbstractTestSuite with Asserts {
+  def setupSuite(): Unit = ()
+  def tearDownSuite(): Unit = ()
   def setup(): Env
   def tearDown(env: Env): Unit
 
@@ -41,7 +43,7 @@ trait TestSuite[Env] extends AbstractTestSuite with Asserts {
   lazy val properties: Properties[_] =
     synchronized {
       if (!isInitialized) isInitialized = true
-      Properties(setup _, (env: Env) => { tearDown(env); Void.UnitRef }, propertiesSeq)
+      Properties(setup _, (env: Env) => { tearDown(env); Void.UnitRef }, setupSuite _, tearDownSuite _, propertiesSeq)
     }
 
   private[this] var propertiesSeq = Seq.empty[TestSpec[Env, Unit]]
