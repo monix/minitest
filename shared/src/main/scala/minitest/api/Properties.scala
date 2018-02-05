@@ -24,6 +24,8 @@ import minitest.api.Utils.silent
 case class Properties[I](
   setup: () => I,
   tearDown: I => Void,
+  setupSuite: () => Unit,
+  tearDownSuite: () => Unit,
   properties: Seq[TestSpec[I, Unit]])
   (implicit ec: ExecutionContext)
   extends Iterable[TestSpec[Unit, Unit]] {

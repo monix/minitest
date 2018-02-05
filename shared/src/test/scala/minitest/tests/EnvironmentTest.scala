@@ -30,6 +30,12 @@ object EnvironmentTest extends TestSuite[Int] {
     assert(env > 0)
   }
 
+  override def setupSuite() = {
+  }
+
+  override def tearDownSuite() = {
+  }
+
   test("simple test") { env =>
     assertEquals(env, env)
   }
