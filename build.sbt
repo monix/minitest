@@ -29,7 +29,7 @@ addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 lazy val baseSettings = Seq(
   organization := "io.monix",
   scalaVersion := "2.12.4",
-  crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4"),
+  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4"),
 
   // -- Settings meant for deployment on oss.sonatype.org
   sonatypeProfileName := organization.value,

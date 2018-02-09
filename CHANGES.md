@@ -1,3 +1,8 @@
+## Version 2.1.0 (Feb 9, 2018)
+
+- Add `setupSuite` and `tearDownSuite` for per suite setup and teardown logic
+- Update Scala and Scala.js to latest stable versions
+
 ## Version 2.0.0 (Nov 10, 2017)
 
 - Simplify API, make it safer with the `Void` for synchronous tests

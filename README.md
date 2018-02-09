@@ -61,7 +61,7 @@ object MySimpleSuite extends SimpleTestSuite {
 ```
 
 In case you want to setup an environment for each test and need `setup` and
-`tearDown` semantics, you could inherit from
+`tearDown` semantics, per test, you could inherit from
 [TestSuite](shared/src/main/scala/minitest/TestSuite.scala). Then on each `test` definition,
 you'll receive a fresh value:
 
@@ -83,6 +83,26 @@ object MyTestSuite extends TestSuite[Int] {
 
   test("should be lower or equal to 100") { env =>
     assert(env <= 100, s"$env > 100")
+  }
+}
+```
+
+Some tests require setup and tear down logic to happen only once per test suite 
+being executed and `TestSuite` supports that as well, but note you should abstain
+from doing this unless you really need it, since the per test semantics are much 
+saner:
+
+```scala
+object MyTestSuite extends TestSuite[Int] {
+  private var system: ActorSystem = _
+
+  override def setupSuite(): Unit = {
+    system = ActorSystem.create()
+  }
+
+  override def tearDownSuite(): Unit = {
+    TestKit.shutdownActorSystem(system)
+    system = null
   }
 }
 ```
