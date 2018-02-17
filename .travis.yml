@@ -6,21 +6,16 @@ matrix:
   include:
   - jdk: oraclejdk8
     scala: 2.12.4
-    env: COMMAND=ci-all PUBLISH=true
+    env: COMMAND=ci-all
 env:
   global:
-  - TRAVIS_NODE_VERSION="6.10"
-  - secure: Vv8crrPrmF5jvgQdXUfjFh8isz9KuECrJGk3nzRyXDQZBNzHxo4fxmaQhOXwhdIOkT0WOQk1oMrqQhptcsEIvuWlDVftijYjcOJY0We+KTTQ5AyGFSc4O2hIn2JClM2N72ua7ZaI4wfeBgEHh1TOFfSWNqgZWnaSIdxyJ7Th2AY=
-  - secure: vRbaa24kUTGmcfyIPJwLF7QrJU5Lk5+WCquz0tPvR4sQvwQDg1mTA0tjXjCXE1z5QSMG5g1CfoieltRbce0QZlXeToxzrgNTRqehEAqbWcvkBB2R9ZhhsVwO+3DG6A+6rEGQ/bB64+62I833UXtEFy1yxfGKeXDuAYf55rVrCVA=
-  - secure: h9EZ3Mq5ott/itLrOTaEozQNsS+X65y8bMVlvN6wBgNjk9qQ9vyw3GJlipHebEGQQs46zV/nyg9xEMKIFfzr4ngtVmouz6QUqvlWhnNFa+3Alx+bwJrNxrMOzqs4Q+66KAKkuDahcpkZIjz7DYBj06+0i9g/8p0QH0gb6/N39Lo=
+  - TRAVIS_NODE_VERSION="8.9"
 install:
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
   && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
   install $TRAVIS_NODE_VERSION
 script:
 - sbt -J-Xmx6144m ++$TRAVIS_SCALA_VERSION $COMMAND
-after_success:
-- "./project/publish"
 notifications:
   webhooks:
     urls:

@@ -1,3 +1,8 @@
+## Version 2.1.1 (Feb 17, 2018)
+
+- Enable Scala 2.13.0-M3 builds
+- Disable automatic publishing
+
 ## Version 2.1.0 (Feb 9, 2018)
 
 - Add `setupSuite` and `tearDownSuite` for per suite setup and teardown logic

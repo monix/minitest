@@ -34,13 +34,6 @@ lazy val baseSettings = Seq(
   // -- Settings meant for deployment on oss.sonatype.org
   sonatypeProfileName := organization.value,
 
-  credentials += Credentials(
-    "Sonatype Nexus Repository Manager",
-    "oss.sonatype.org",
-    sys.env.getOrElse("SONATYPE_USER", ""),
-    sys.env.getOrElse("SONATYPE_PASS", "")
-  ),
-
   publishMavenStyle := true,
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
@@ -224,12 +217,6 @@ lazy val lawsJS = project.in(file("laws/js"))
   .settings(lawsSettings)
 
 //------------- For Release
-
-useGpg := false
-usePgpKeyHex("2673B174C4071B0E")
-pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg"
-pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg"
-pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 
 enablePlugins(GitVersioning)
 
