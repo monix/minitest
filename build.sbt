@@ -29,7 +29,7 @@ addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 lazy val baseSettings = Seq(
   organization := "io.monix",
   scalaVersion := "2.12.4",
-  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4"),
+  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4", "2.13.0-M3"),
 
   // -- Settings meant for deployment on oss.sonatype.org
   sonatypeProfileName := organization.value,
@@ -145,7 +145,7 @@ lazy val sharedSettings = baseSettings ++ Seq(
 
   // Version specific options
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) =>
+    case Some((2, v)) if v >= 12 =>
       scalaLinterOptions
     case Some((2, 11)) =>
       scalaLinterOptions ++ Seq("-target:jvm-1.6")
