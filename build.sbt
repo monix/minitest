@@ -201,7 +201,7 @@ lazy val minitestJS = project.in(file("js"))
 lazy val lawsSettings = Seq(
   name := "minitest-laws",
   libraryDependencies ++= Seq(
-    "org.scalacheck" %%% "scalacheck" % "1.13.5"
+    "org.scalacheck" %%% "scalacheck" % "1.14.0"
   ))
 
 lazy val lawsJVM = project.in(file("laws/jvm"))
