@@ -158,20 +158,24 @@ lazy val scalaJSSettings = Seq(
   scalaJSStage in Test := FastOptStage
 )
 
-lazy val under213 = Set("2.10", "2.11", "2.12")
+lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")
 
 lazy val requiredMacroCompatDeps = Seq(
+  needsScalaParadise := {
+    val sv = scalaVersion.value
+    (sv startsWith "2.10.") || (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
+  },
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
     "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
     "org.typelevel" %%% "macro-compat" % "1.1.1",
   ),
   libraryDependencies ++= {
-    if (under213 contains scalaBinaryVersion.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
+    if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
     else Nil
   },
   scalacOptions ++= {
-    if (under213 contains scalaBinaryVersion.value) Nil
+    if (needsScalaParadise.value) Nil
     else Seq("-Ymacro-annotations")
   }
 )
