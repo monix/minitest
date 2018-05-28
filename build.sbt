@@ -158,13 +158,23 @@ lazy val scalaJSSettings = Seq(
   scalaJSStage in Test := FastOptStage
 )
 
+lazy val under213 = Set("2.10", "2.11", "2.12")
+
 lazy val requiredMacroCompatDeps = Seq(
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
     "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
     "org.typelevel" %%% "macro-compat" % "1.1.1",
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch)
-  ))
+  ),
+  libraryDependencies ++= {
+    if (under213 contains scalaBinaryVersion.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
+    else Nil
+  },
+  scalacOptions ++= {
+    if (under213 contains scalaBinaryVersion.value) Nil
+    else Seq("-Ymacro-annotations")
+  }
+)
 
 lazy val minitest = project.in(file("."))
   .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
