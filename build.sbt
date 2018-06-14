@@ -27,7 +27,7 @@ addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 
 ThisBuild / scalaVersion := "2.12.4"
-ThisBuild / crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4", "2.13.0-M3")
+ThisBuild / crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4", "2.13.0-M4")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
