@@ -59,9 +59,7 @@ lazy val scalaLinterOptions =
     "-Xlint:poly-implicit-overload", // parameterized overloaded implicit methods are not visible as view bounds
     "-Xlint:option-implicit", // Option.apply used implicit view
     "-Xlint:delayedinit-select", // Selecting member of DelayedInit
-    "-Xlint:by-name-right-associative", // By-name parameter of right associative operator
     "-Xlint:package-object-classes", // Class or object defined in package object
-    "-Xlint:unsound-match" // Pattern match may not be typesafe
   )
 
 lazy val sharedSettings = Seq(
@@ -89,6 +87,15 @@ lazy val sharedSettings = Seq(
       scalaLinterOptions ++ Seq("-target:jvm-1.6")
     case _ =>
       Seq("-target:jvm-1.6")
+  }),
+  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 11 | 12)) =>
+      Seq(
+        "-Xlint:unsound-match", // Pattern match may not be typesafe
+        "-Xlint:by-name-right-associative" // By-name parameter of right associative operator
+      )
+    case _ =>
+      Nil
   }),
 
   resolvers ++= Seq(
