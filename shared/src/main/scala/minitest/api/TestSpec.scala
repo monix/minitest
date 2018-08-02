@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import minitest.{ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 

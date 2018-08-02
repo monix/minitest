@@ -26,8 +26,10 @@ import com.typesafe.sbt.GitVersioning
 addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 
+val Scala211 = "2.11.12"
+
 ThisBuild / scalaVersion := "2.12.4"
-ThisBuild / crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.4", "2.13.0-M4")
+ThisBuild / crossScalaVersions := Seq("2.10.7", Scala211, "2.12.4", "2.13.0-M4")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
@@ -110,6 +112,11 @@ lazy val scalaJSSettings = Seq(
   scalaJSStage in Test := FastOptStage
 )
 
+lazy val nativeSettings = Seq(
+  scalaVersion := Scala211,
+  crossScalaVersions := Seq(Scala211)
+)
+
 lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")
 
 lazy val requiredMacroCompatDeps = Seq(
@@ -120,7 +127,7 @@ lazy val requiredMacroCompatDeps = Seq(
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
     "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-    "org.typelevel" %%% "macro-compat" % "1.1.1",
+    "org.typelevel" %% "macro-compat" % "1.1.1",
   ),
   libraryDependencies ++= {
     if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
@@ -133,7 +140,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, minitestNative)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -149,18 +156,31 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.scala-sbt" % "test-interface" % "1.0",
-      "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      "org.scala-sbt" % "test-interface" % "1.0"
     ),
+  )
+  .platformsSettings(JVMPlatform, JSPlatform)(
+    unmanagedSourceDirectories in Compile += {
+      (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
+    }
+  )
+  .platformsSettings(JVMPlatform, NativePlatform)(
+    libraryDependencies ++= Seq(
+      "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+    )
   )
   .jsSettings(
     scalaJSSettings,
     libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
   )
+  .nativeSettings(
+    nativeSettings,
+    libraryDependencies += "org.scala-native" %%% "test-interface" % nativeVersion
+  )
 
 lazy val minitestJVM    = minitest.jvm
 lazy val minitestJS     = minitest.js
-// lazy val minitestNative = minitest.native
+lazy val minitestNative = minitest.native
 
 lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("laws"))
   .dependsOn(minitest)
@@ -174,6 +194,9 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("l
   )
   .jsSettings(
     scalaJSSettings
+  )
+  .nativeSettings(
+    nativeSettings
   )
 
 lazy val lawsJVM    = laws.jvm
