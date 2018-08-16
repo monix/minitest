@@ -27,18 +27,26 @@ addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 
 val Scala211 = "2.11.12"
+val Scala212 = "2.12.4"
+val Dotty = "0.9.0-RC1"
 
-ThisBuild / scalaVersion := "2.12.4"
-ThisBuild / crossScalaVersions := Seq("2.10.7", Scala211, "2.12.4", "2.13.0-M4")
+val AllScala2Versions = Seq("2.10.7", Scala211, Scala212, "2.13.0-M4")
+
+ThisBuild / scalaVersion := Scala212
+
+ThisBuild / crossScalaVersions := AllScala2Versions :+ Dotty
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
   Seq(Compile, Test).map { sc =>
     (unmanagedSourceDirectories in sc) ++= {
-      (unmanagedSourceDirectories in sc).value.map { dir =>
+      (unmanagedSourceDirectories in sc).value.flatMap { dir =>
         scalaPartV.value match {
           case Some((major, minor)) =>
-            new File(dir.getPath + s"_$major.$minor")
+            Seq(new File(dir.getPath + s"_$major.$minor")) ++ {
+              if (major == 2) Seq(new File(dir.getPath + s"_2"))
+              else Nil
+            }
           case None =>
             throw new NoSuchElementException("Scala version")
         }
@@ -87,6 +95,8 @@ lazy val sharedSettings = Seq(
       scalaLinterOptions
     case Some((2, 11)) =>
       scalaLinterOptions ++ Seq("-target:jvm-1.6")
+    case Some((0, 9)) =>
+      scalaLinterOptions
     case _ =>
       Seq("-target:jvm-1.6")
   }),
@@ -109,7 +119,8 @@ lazy val sharedSettings = Seq(
 )
 
 lazy val scalaJSSettings = Seq(
-  scalaJSStage in Test := FastOptStage
+  scalaJSStage in Test := FastOptStage,
+  scalaVersion := Scala212
 )
 
 lazy val nativeSettings = Seq(
@@ -124,11 +135,13 @@ lazy val requiredMacroCompatDeps = Seq(
     val sv = scalaVersion.value
     (sv startsWith "2.10.") || (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
   },
-  libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-    "org.typelevel" %% "macro-compat" % "1.1.1",
-  ),
+  libraryDependencies ++= {
+    if (!isDotty.value) Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+    ) else Nil
+  },
   libraryDependencies ++= {
     if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
     else Nil
@@ -151,8 +164,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   .settings(
     name := "minitest",
     sharedSettings,
-    crossVersionSharedSources,
-    requiredMacroCompatDeps
+    requiredMacroCompatDeps,
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -166,7 +178,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(JVMPlatform, NativePlatform)(
     libraryDependencies ++= Seq(
-      "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      ("org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided").withDottyCompat(scalaVersion.value)
     )
   )
   .jsSettings(
@@ -176,6 +188,9 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   .nativeSettings(
     nativeSettings,
     libraryDependencies += "org.scala-native" %%% "test-interface" % nativeVersion
+  )
+  .settings(
+    crossVersionSharedSources,
   )
 
 lazy val minitestJVM    = minitest.jvm
@@ -188,8 +203,9 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("l
     name := "minitest-laws",
     sharedSettings,
     crossVersionSharedSources,
+    crossScalaVersions := AllScala2Versions,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.0"
+      ("org.scalacheck" %%% "scalacheck" % "1.14.0").withDottyCompat(scalaVersion.value)
     )
   )
   .jsSettings(

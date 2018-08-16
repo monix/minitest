@@ -18,7 +18,7 @@
 package minitest.runner
 
 import minitest.runner.Framework.ModuleFingerprint
-import sbt.testing.{Framework => BaseFramework, _}
+import sbt.testing.{Framework => BaseFramework, Fingerprint, SubclassFingerprint}
 
 class Framework extends BaseFramework {
   def name(): String = "minitest"
