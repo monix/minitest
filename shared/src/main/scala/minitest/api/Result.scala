@@ -18,7 +18,7 @@
 package minitest.api
 
 import scala.compat.Platform.EOL
-import scala.Console.{GREEN, RED, YELLOW}
+import scala.Console.{GREEN, RED, YELLOW, RESET}
 
 sealed trait Result[+T] {
   def formatted(name: String): String
@@ -27,7 +27,7 @@ sealed trait Result[+T] {
 object Result {
   final case class Success[+T](value: T) extends Result[T] {
     def formatted(name: String): String = {
-      GREEN + "- " + name + EOL
+      GREEN + "- " + name + RESET + EOL
     }
   }
 
@@ -36,7 +36,7 @@ object Result {
 
     def formatted(name: String): String = {
       val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
-      YELLOW + "- " + name + " !!! IGNORED !!!" + EOL + reasonStr
+      YELLOW + "- " + name + " !!! IGNORED !!!" + RESET + EOL + reasonStr
     }
   }
 
@@ -45,7 +45,7 @@ object Result {
 
     def formatted(name: String): String = {
       val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
-      YELLOW + "- " + name + " !!! CANCELED !!!" + EOL + reasonStr
+      YELLOW + "- " + name + " !!! CANCELED !!!" + RESET + EOL + reasonStr
     }
   }
 
@@ -108,7 +108,7 @@ object Result {
       location, RED, "  "
     )
 
-    RED + s"- $name *** FAILED ***" + EOL +
+    RED + s"- $name *** FAILED ***" + RESET + EOL +
       formattedMessage + stackTrace
   }
 
@@ -122,9 +122,9 @@ object Result {
       if (index == 0)
         color + prefix + line +
           location.fold("")(l => s" (${l.fileName.getOrElse("none")}:${l.line})") +
-          EOL
+          RESET + EOL
       else
-        color + prefix + line + EOL
+        color + prefix + line + RESET + EOL
     }
 
     lines.mkString
