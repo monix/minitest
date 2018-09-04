@@ -5,7 +5,7 @@ group: edge
 matrix:
   include:
   - jdk: oraclejdk8
-    scala: 2.12.4
+    scala: 2.12.6
     env: COMMAND=ci-all
 env:
   global:
