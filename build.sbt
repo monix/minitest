@@ -140,7 +140,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, minitestNative)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -180,7 +180,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
 
 lazy val minitestJVM    = minitest.jvm
 lazy val minitestJS     = minitest.js
-lazy val minitestNative = minitest.native
+// lazy val minitestNative = minitest.native
 
 lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("laws"))
   .dependsOn(minitest)
