@@ -27,7 +27,7 @@ class Framework extends BaseFramework {
     Array(ModuleFingerprint)
 
   def runner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader): Runner =
-    new Runner(args, remoteArgs, testClassLoader)
+    new minitest.runner.Runner(args, remoteArgs, testClassLoader)
 
   def slaveRunner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader, send: (String) => Unit): Runner =
     runner(args, remoteArgs, testClassLoader)
