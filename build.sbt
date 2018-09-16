@@ -29,7 +29,7 @@ addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 val Scala211 = "2.11.12"
 
 scalaVersion := "2.12.6"
-crossScalaVersions := Seq("2.10.7", Scala211, "2.12.6", "2.13.0-M4")
+crossScalaVersions := Seq("2.10.7", Scala211, "2.12.6", "2.13.0-M5")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
@@ -140,7 +140,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
+  .aggregate(minitestJVM, minitestJS, minitestNative, lawsJVM, lawsJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -204,4 +204,5 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("l
 
 lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
-lazy val lawsNative = laws.native
+// TODO: Enable once ScalaCheck is available for Native code
+// lazy val lawsNative = laws.native
