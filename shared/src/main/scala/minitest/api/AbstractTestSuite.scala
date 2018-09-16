@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
+import minitest.Platform.EnableReflectiveInstantiation
 
 @EnableReflectiveInstantiation
 trait AbstractTestSuite {

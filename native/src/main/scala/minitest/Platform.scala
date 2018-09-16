@@ -22,6 +22,9 @@ import scala.scalanative.testinterface.PreloadedClassLoader
 trait Platform
 
 object Platform extends Platform {
-  private[minitest] def loadModule(name: String, loader: ClassLoader): AnyRef =
+  type EnableReflectiveInstantiation =
+    scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
+
+  private[minitest] def loadModule(name: String, loader: ClassLoader): Any =
     loader.asInstanceOf[PreloadedClassLoader].loadPreloaded(name)
 }

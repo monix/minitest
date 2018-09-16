@@ -17,7 +17,7 @@
 
 package minitest
 
-import org.scalajs.testinterface.TestUtils
+import org.portablescala.reflect.Reflect
 
 trait Platform {
   type Future[+A] = scala.concurrent.Future[A]
@@ -32,6 +32,13 @@ trait Platform {
 }
 
 object Platform extends Platform {
-  private[minitest] def loadModule(name: String, loader: ClassLoader): AnyRef =
-    TestUtils.loadModule(name, loader)
+  type EnableReflectiveInstantiation =
+    org.portablescala.reflect.annotation.EnableReflectiveInstantiation
+
+  private[minitest] def loadModule(name: String, loader: ClassLoader): Any = {
+    Reflect
+      .lookupLoadableModuleClass(name + "$", loader)
+      .getOrElse(throw new ClassNotFoundException(name))
+      .loadModule()
+  }
 }
