@@ -23,8 +23,11 @@ import minitest.api.SourceLocation
 object SourceLocationTest extends SimpleTestSuite {
   test("implicit SourceLocation works") {
     val pos = implicitly[SourceLocation]
-    // TODO: add missing test!
-    // SourceLocation(Some(SourceLocationTest.scala),Some(/Users/alex/Projects/monix/minitest/shared/src/test/scala/minitest/tests/SourceLocationTest.scala),25)
-    println(pos)
+    pos match {
+      case SourceLocation(Some("SourceLocationTest.scala"), Some(path), 25) =>
+        assert(path.contains("SourceLocationTest.scala"))
+      case _ =>
+        fail(s"Unexpected value: $pos")
+    }
   }
 }
