@@ -11,7 +11,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "2.2.0" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "2.2.1" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -21,7 +21,7 @@ integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.0" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.1" % "test"
 ```
 
 ## Tutorial
@@ -87,9 +87,9 @@ object MyTestSuite extends TestSuite[Int] {
 }
 ```
 
-Some tests require setup and tear down logic to happen only once per test suite 
+Some tests require setup and tear down logic to happen only once per test suite
 being executed and `TestSuite` supports that as well, but note you should abstain
-from doing this unless you really need it, since the per test semantics are much 
+from doing this unless you really need it, since the per test semantics are much
 saner:
 
 ```scala
@@ -107,7 +107,7 @@ object MyTestSuite extends TestSuite[Int] {
 }
 ```
 
-Minitest supports asynchronous results in tests, just use `testAsync` and 
+Minitest supports asynchronous results in tests, just use `testAsync` and
 return a `Future[Unit]`:
 
 ```scala
@@ -116,7 +116,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object MySimpleSuite extends SimpleTestSuite {
   testAsync("asynchronous execution") {
     val future = Future(100).map(_+1)
-    
+
     for (result <- future) yield {
       assertEquals(result, 101)
     }
@@ -124,7 +124,7 @@ object MySimpleSuite extends SimpleTestSuite {
 }
 ```
 
-Minitest has integration with [ScalaCheck](https://www.scalacheck.org/). 
+Minitest has integration with [ScalaCheck](https://www.scalacheck.org/).
 So for property-based testing:
 
 ```scala
@@ -134,7 +134,7 @@ object MyLawsTest extends SimpleTestSuite with Checkers {
   test("addition of integers is commutative") {
     check2((x: Int, y: Int) => x + y == y + x)
   }
-  
+
   test("addition of integers is transitive") {
     check3((x: Int, y: Int, z: Int) => (x + y) + z == x + (y + z))
   }
@@ -148,4 +148,4 @@ That's all you need to know.
 All code in this repository is licensed under the Apache License, Version 2.0.
 See [LICENCE](./LICENSE).
 
-Copyright &copy; 2014-2016 Alexandru Nedelcu
+Copyright &copy; 2014-2018 by The Minitest Project Developers.
