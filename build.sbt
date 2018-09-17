@@ -29,7 +29,7 @@ addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 val Scala211 = "2.11.12"
 
 ThisBuild / scalaVersion := "2.12.6"
-ThisBuild / crossScalaVersions := Seq("2.10.7", Scala211, "2.12.6", "2.13.0-M5")
+ThisBuild / crossScalaVersions := Seq("2.10.7", Scala211, "2.12.6", "2.13.0-M4")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
@@ -76,7 +76,7 @@ lazy val sharedSettings = Seq(
 
   scalacOptions ++= Seq(
     "-unchecked", "-deprecation", "-feature", "-Xlint",
-    "-Ywarn-adapted-args", "-Ywarn-dead-code", "-Ywarn-inaccessible",
+    "-Ywarn-dead-code", "-Ywarn-inaccessible",
     "-Ywarn-nullary-override", "-Ywarn-nullary-unit",
     "-Xlog-free-terms"
   ),
@@ -94,7 +94,8 @@ lazy val sharedSettings = Seq(
     case Some((2, 11 | 12)) =>
       Seq(
         "-Xlint:unsound-match", // Pattern match may not be typesafe
-        "-Xlint:by-name-right-associative" // By-name parameter of right associative operator
+        "-Xlint:by-name-right-associative", // By-name parameter of right associative operator
+        "-Ywarn-adapted-args"
       )
     case _ =>
       Nil
