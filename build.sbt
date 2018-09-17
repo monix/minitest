@@ -115,7 +115,9 @@ lazy val scalaJSSettings = Seq(
 
 lazy val nativeSettings = Seq(
   scalaVersion := Scala211,
-  crossScalaVersions := Seq(Scala211)
+  crossScalaVersions := Seq(Scala211),
+  publishConfiguration := publishConfiguration.value.withOverwrite(true),
+  publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
 )
 
 lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")

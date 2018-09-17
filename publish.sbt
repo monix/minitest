@@ -36,9 +36,6 @@ ThisBuild / developers := List(
     url=url("https://alexn.org")
   ))
 
-publishConfiguration := publishConfiguration.value.withOverwrite(true)
-publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
-
 // -- Settings meant for deployment on oss.sonatype.org
 ThisBuild / sonatypeProfileName := (ThisBuild / organization).value
 ThisBuild / publishMavenStyle := true
