@@ -64,6 +64,14 @@ lazy val scalaLinterOptions =
     "-Xlint:package-object-classes", // Class or object defined in package object
   )
 
+lazy val scalaTwoTwelveDeprecatedOptions =
+  Seq(
+    // Deprecated in 2.12, removed in 2.13
+    "-Ywarn-inaccessible",
+    "-Ywarn-nullary-override",
+    "-Ywarn-nullary-unit"
+  )
+
 lazy val sharedSettings = Seq(
   scalacOptions in ThisBuild ++= Seq(
     // Note, this is used by the doc-source-url feature to determine the
@@ -76,8 +84,7 @@ lazy val sharedSettings = Seq(
 
   scalacOptions ++= Seq(
     "-unchecked", "-deprecation", "-feature", "-Xlint",
-    "-Ywarn-dead-code", "-Ywarn-inaccessible",
-    "-Ywarn-nullary-override", "-Ywarn-nullary-unit",
+    "-Ywarn-dead-code",
     "-Xlog-free-terms"
   ),
 
@@ -85,8 +92,10 @@ lazy val sharedSettings = Seq(
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, v)) if v >= 12 =>
       scalaLinterOptions
+    case Some((2, 12)) =>
+      scalaLinterOptions ++ scalaTwoTwelveDeprecatedOptions
     case Some((2, 11)) =>
-      scalaLinterOptions ++ Seq("-target:jvm-1.6")
+      scalaLinterOptions ++ Seq("-target:jvm-1.6") ++ scalaTwoTwelveDeprecatedOptions
     case _ =>
       Seq("-target:jvm-1.6")
   }),
