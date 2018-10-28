@@ -1,7 +1,7 @@
 # Minitest
 
-A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12 and
-[Scala.js 0.6.x](http://www.scala-js.org/).
+A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12,
+2.13 and [Scala.js 0.6.x](http://www.scala-js.org/).
 
 [![Build Status](https://travis-ci.org/monix/minitest.svg?branch=master)](https://travis-ci.org/monix/minitest)
 
@@ -11,7 +11,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "2.2.1" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "2.2.2" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -21,7 +21,7 @@ integration:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.1" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.2" % "test"
 ```
 
 ## Tutorial

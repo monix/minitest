@@ -69,7 +69,7 @@ enablePlugins(GitVersioning)
 /* The BaseVersion setting represents the in-development (upcoming) version,
  * as an alternative to SNAPSHOTS.
  */
-git.baseVersion := "2.0.0"
+git.baseVersion := "2.2.2"
 
 val ReleaseTag = """^v(\d+\.\d+\.\d+(?:[-.]\w+)?)$""".r
 git.gitTagToVersionNumber := {
