@@ -24,7 +24,7 @@ import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
 addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
-addCommandAlias("release", ";+publishSigned ;+minitestNative/publishSigned")
+addCommandAlias("release", ";+clean ;+minitestNative/clean ;+publishSigned ;+minitestNative/publishSigned")
 
 val Scala211 = "2.11.12"
 
