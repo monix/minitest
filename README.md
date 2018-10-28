@@ -1,7 +1,8 @@
 # Minitest
 
 A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12,
-2.13 and [Scala.js 0.6.x](http://www.scala-js.org/).
+2.13, [Scala.js 0.6.x](http://www.scala-js.org/) and
+[Scala Native 0.3.x](https://www.scala-native.org/).
 
 [![Build Status](https://travis-ci.org/monix/minitest.svg?branch=master)](https://travis-ci.org/monix/minitest)
 
@@ -16,13 +17,16 @@ libraryDependencies += "io.monix" %% "minitest" % "2.2.2" % "test"
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
 
-In case you want the optional package for [ScalaCheck](https://www.scalacheck.org/)
-integration:
+In case you want the optional package for
+[ScalaCheck](https://www.scalacheck.org/) integration:
 
 ```scala
 // use the %%% operator for Scala.js
 libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.2" % "test"
 ```
+
+Note that at this time the laws package is not available for Scala
+Native, due to ScalaCheck not being available for it.
 
 ## Tutorial
 
