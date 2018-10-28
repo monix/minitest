@@ -24,7 +24,7 @@ import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
 addCommandAlias("ci-all",  ";+clean ;+compile ;+test ;+package")
-addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
+addCommandAlias("release", ";+publishSigned ;+minitestNative/publishSigned")
 
 val Scala211 = "2.11.12"
 
@@ -152,7 +152,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, minitestNative, lawsJVM, lawsJS)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
