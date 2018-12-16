@@ -22,7 +22,7 @@ In case you want the optional package for
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.2.2" % "test"
+libraryDependencies += "io.monix" %%% "minitest-laws" % "2.2.2" % "test"
 ```
 
 Note that at this time the laws package is not available for Scala
