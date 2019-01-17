@@ -18,6 +18,7 @@
 package minitest
 
 import minitest.api._
+import minitest.platform._
 
 trait SimpleTestSuite extends AbstractTestSuite with Asserts {
   def test(name: String)(f: => Void): Unit =

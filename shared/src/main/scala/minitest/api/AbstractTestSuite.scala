@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import minitest.Platform.EnableReflectiveInstantiation
+import minitest.platform.EnableReflectiveInstantiation
 
 @EnableReflectiveInstantiation
 trait AbstractTestSuite {

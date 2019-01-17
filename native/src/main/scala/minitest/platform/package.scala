@@ -15,4 +15,14 @@
  * limitations under the License.
  */
 
-package object minitest extends Platform
+package minitest
+
+import scala.scalanative.testinterface.PreloadedClassLoader
+
+package object platform {
+  type EnableReflectiveInstantiation =
+    scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
+
+  private[minitest] def loadModule(name: String, loader: ClassLoader): Any =
+    loader.asInstanceOf[PreloadedClassLoader].loadPreloaded(name)
+}

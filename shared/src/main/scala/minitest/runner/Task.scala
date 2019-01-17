@@ -20,7 +20,7 @@ package minitest.runner
 import minitest.api._
 import sbt.testing.{Task => BaseTask, _}
 import scala.concurrent.duration.Duration
-import minitest.{Await, ExecutionContext, Future, Promise, Platform}
+import minitest.platform._
 import scala.util.Try
 
 final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask {
@@ -83,7 +83,7 @@ final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask
   }
 
   def loadSuite(name: String, loader: ClassLoader): Option[AbstractTestSuite] = {
-    Try(Platform.loadModule(name, loader)).toOption
+    Try(loadModule(name, loader)).toOption
       .collect { case ref: AbstractTestSuite => ref }
   }
 

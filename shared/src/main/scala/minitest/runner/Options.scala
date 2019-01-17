@@ -19,16 +19,16 @@ package minitest.runner
 
 /**
   * Configurable options for the runner.
+  *
+  * @param useSbtLogging specifies whether to use SBT's test-logging infrastructure,
+  *        or just println.
+  *
+  *        Defaults to `println` because SBT's test logging doesn't seem to give us
+  *        anything that we want, and does annoying things like making a left-hand
+  *        gutter and buffering input by default.
+  *
+  *        Option inspired by its availability in uTest and other testing frameworks.
   */
 final case class Options(
-  /**
-    * Whether to use SBT's test-logging infrastructure, or just println.
-    *
-    * Defaults to println because SBT's test logging doesn't seem to give us
-    * anything that we want, and does annoying things like making a left-hand
-    * gutter and buffering input by default.
-    *
-    * Option inspired by its availability in uTest.
-    */
   useSbtLogging: Boolean = true
 )
