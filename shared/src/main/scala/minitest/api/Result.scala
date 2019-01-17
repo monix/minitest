@@ -21,45 +21,51 @@ import scala.compat.Platform.EOL
 import scala.Console.{GREEN, RED, YELLOW, RESET}
 
 sealed trait Result[+T] {
-  def formatted(name: String): String
+  def formatted(name: String, withColors: Boolean): String
 }
 
 object Result {
   final case class Success[+T](value: T) extends Result[T] {
-    def formatted(name: String): String = {
-      GREEN + "- " + name + RESET + EOL
+    def formatted(name: String, withColors: Boolean): String = {
+      val color = if (withColors) GREEN else ""
+      val reset = if (withColors) RESET else ""
+      color + "- " + name + reset + EOL
     }
   }
 
   final case class Ignored(reason: Option[String], location: Option[SourceLocation])
     extends Result[Nothing] {
 
-    def formatted(name: String): String = {
-      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
-      YELLOW + "- " + name + " !!! IGNORED !!!" + RESET + EOL + reasonStr
+    def formatted(name: String, withColors: Boolean): String = {
+      val color = if (withColors) YELLOW else ""
+      val reset = if (withColors) RESET else ""
+      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, color, reset, "  "))
+      color + "- " + name + " !!! IGNORED !!!" + reset + EOL + reasonStr
     }
   }
 
   final case class Canceled(reason: Option[String], location: Option[SourceLocation])
     extends Result[Nothing] {
 
-    def formatted(name: String): String = {
-      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, YELLOW, "  "))
-      YELLOW + "- " + name + " !!! CANCELED !!!" + RESET + EOL + reasonStr
+    def formatted(name: String, withColors: Boolean): String = {
+      val color = if (withColors) YELLOW else ""
+      val reset = if (withColors) RESET else ""
+      val reasonStr = reason.fold("")(msg => formatDescription(msg, location, color, reset, "  "))
+      color + "- " + name + " !!! CANCELED !!!" + reset + EOL + reasonStr
     }
   }
 
   final case class Failure(msg: String, source: Option[Throwable], location: Option[SourceLocation])
     extends Result[Nothing] {
 
-    def formatted(name: String): String =
-      formatError(name, msg, source, location, Some(20))
+    def formatted(name: String, withColors: Boolean): String =
+      formatError(name, msg, source, location, Some(20), withColors)
   }
 
   final case class Exception(source: Throwable, location: Option[SourceLocation])
     extends Result[Nothing] {
 
-    def formatted(name: String): String = {
+    def formatted(name: String, withColors: Boolean): String = {
       val description = {
         val name = source.getClass.getName
         val className = name.substring(name.lastIndexOf(".") + 1)
@@ -67,7 +73,7 @@ object Result {
           .fold(className)(m => s"$className: $m")
       }
 
-      formatError(name, description, Some(source), location, None)
+      formatError(name, description, Some(source), location, None, withColors)
     }
   }
 
@@ -89,8 +95,11 @@ object Result {
   private def formatError(name: String, msg: String,
     source: Option[Throwable],
     location: Option[SourceLocation],
-    traceLimit: Option[Int]): String = {
+    traceLimit: Option[Int],
+    withColors: Boolean): String = {
 
+    val color = if (withColors) RED else ""
+    val reset = if (withColors) RESET else ""
     val stackTrace = source.fold("") { ex =>
       val trace: Array[String] = {
         val tr = ex.getStackTrace.map(_.toString)
@@ -100,15 +109,14 @@ object Result {
         }
       }
 
-      formatDescription(trace.mkString("\n"), None, RED, "    ")
+      formatDescription(trace.mkString("\n"), None, color, reset, "    ")
     }
 
     val formattedMessage = formatDescription(
       if (msg != null && msg.nonEmpty) msg else "Test failed",
-      location, RED, "  "
-    )
+      location, color, reset, "  ")
 
-    RED + s"- $name *** FAILED ***" + RESET + EOL +
+    color + s"- $name *** FAILED ***" + reset + EOL +
       formattedMessage + stackTrace
   }
 
@@ -116,15 +124,17 @@ object Result {
     message: String,
     location: Option[SourceLocation],
     color: String,
+    reset: String,
     prefix: String): String = {
 
     val lines = message.split("\\r?\\n").zipWithIndex.map { case (line, index) =>
       if (index == 0)
         color + prefix + line +
           location.fold("")(l => s" (${l.fileName.getOrElse("none")}:${l.line})") +
-          RESET + EOL
+          reset +
+          EOL
       else
-        color + prefix + line + RESET + EOL
+        color + prefix + line + reset + EOL
     }
 
     lines.mkString

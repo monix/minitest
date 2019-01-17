@@ -23,14 +23,30 @@ import scala.concurrent.duration.Duration
 import minitest.{Await, ExecutionContext, Future, Promise, Platform}
 import scala.util.Try
 
-final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
+final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask {
   implicit val ec: ExecutionContext = DefaultExecutionContext
+  private[this] val console = if (opts.useSbtLogging) None else Some(Array(new ConsoleLogger))
 
   def tags(): Array[String] = Array.empty
   def taskDef(): TaskDef = task
 
+  def reportStart(name: String, loggers: Array[Logger]): Unit = {
+    for (logger <- console.getOrElse(loggers)) {
+      val withColors = logger.ansiCodesSupported()
+      val color = if (withColors) Console.GREEN else ""
+      val reset = if (withColors) Console.RESET else ""
+      logger.info(color + name + reset)
+    }
+  }
+
+  def report(name: String, r: Result[_], loggers: Array[Logger]): Unit = {
+    for (logger <- console.getOrElse(loggers)) {
+      logger.info(r.formatted(name, logger.ansiCodesSupported()))
+    }
+  }
+
   def execute(eventHandler: EventHandler, loggers: Array[Logger],
-    continuation: (Array[BaseTask]) => Unit): Unit = {
+    continuation: Array[BaseTask] => Unit): Unit = {
 
     def loop(props: Iterator[TestSpec[Unit, Unit]]): Future[Unit] = {
       if (!props.hasNext) unit else {
@@ -41,7 +57,7 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
         futureResult.flatMap { result =>
           val endTS = System.currentTimeMillis()
 
-          loggers.foreach(_.info(result.formatted(property.name)))
+          report(property.name, result, loggers)
           eventHandler.handle(event(result, endTS - startTS))
           loop(props)
         }
@@ -49,7 +65,7 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
     }
 
     val future = loadSuite(task.fullyQualifiedName(), cl).fold(unit) { suite =>
-      loggers.foreach(_.info(Console.GREEN + task.fullyQualifiedName() + Console.RESET))
+      reportStart(task.fullyQualifiedName(), loggers)
       suite.properties.setupSuite()
       loop(suite.properties.iterator).map { _ =>
         suite.properties.tearDownSuite()
