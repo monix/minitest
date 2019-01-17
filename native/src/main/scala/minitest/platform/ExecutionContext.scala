@@ -16,15 +16,22 @@
  */
 
 package minitest
+package platform
 
-import scala.scalanative.testinterface.PreloadedClassLoader
+/**
+  * Stub needed because Scala Native does not provide an
+  * implementation for [[scala.concurrent.ExecutionContext]] yet.
+  *
+  * Note that this isn't a proper `ExecutionContext` implementation,
+  * just something very simple for compilation to work and
+  * to pass the current tests.
+  */
+trait ExecutionContext
 
-trait Platform
+object ExecutionContext {
+  val global: ExecutionContext = new ExecutionContext{}
 
-object Platform extends Platform {
-  type EnableReflectiveInstantiation =
-    scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
-
-  private[minitest] def loadModule(name: String, loader: ClassLoader): Any =
-    loader.asInstanceOf[PreloadedClassLoader].loadPreloaded(name)
+  object Implicits {
+    implicit val global: ExecutionContext = ExecutionContext.global
+  }
 }

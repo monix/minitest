@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import minitest.{ExecutionContext, Future}
+import minitest.platform.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 import minitest.api.Utils.silent
 

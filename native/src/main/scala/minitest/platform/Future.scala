@@ -16,11 +16,19 @@
  */
 
 package minitest
+package platform
 
 import scala.util.{Failure, Success, Try}
 
+/**
+  * Stub needed because Scala Native does not provide an
+  * implementation for [[scala.concurrent.Future]] yet.
+  *
+  * Note that this isn't a proper `Future` implementation,
+  * just something very simple for compilation to work and
+  * to pass the current tests.
+  */
 final class Future[+A] private[minitest] (private[minitest] val value: Try[A]) {
-
   def map[B](f: A => B)(implicit executor: ExecutionContext): Future[B] =
     new Future(value.map(f))
 
@@ -29,11 +37,9 @@ final class Future[+A] private[minitest] (private[minitest] val value: Try[A]) {
 
   def onComplete[U](f: Try[A] => U)(implicit executor: ExecutionContext): Unit =
     f(value)
-
 }
 
 object Future {
-
   def apply[A](f: => A): Future[A] =
     new Future(Try(f))
 
@@ -42,5 +48,4 @@ object Future {
 
   def failed[A](e: Throwable): Future[A] =
     new Future(Failure(e))
-
 }

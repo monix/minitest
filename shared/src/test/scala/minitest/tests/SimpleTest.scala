@@ -19,7 +19,7 @@ package minitest.tests
 
 import minitest.SimpleTestSuite
 import minitest.api.AssertionException
-import minitest.Future
+import minitest.platform.Future
 
 object SimpleTest extends SimpleTestSuite {
   test("ignored test") {
@@ -86,7 +86,7 @@ object SimpleTest extends SimpleTestSuite {
   }
 
   testAsync("asynchronous test") {
-    import minitest.ExecutionContext.Implicits.global
+    import minitest.platform.ExecutionContext.Implicits.global
 
     Future(1).map(_+1).map { result =>
       assertEquals(result, 2)
