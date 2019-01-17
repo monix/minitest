@@ -1,3 +1,9 @@
+## Version 2.3.0 (Jan 17, 2019)
+
+- Updated Scala to 2.12.8, SBT to 1.2.8, ScalaJS to 0.6.26, Scala Native to 0.3.8
+- Change logging to use `System.out.println` directly
+- Refactored the Scala Native integration
+
 ## Version 2.1.1 (Feb 17, 2018)
 
 - Enable Scala 2.13.0-M3 builds
