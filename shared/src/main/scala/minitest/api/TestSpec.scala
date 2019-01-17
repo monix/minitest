@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 by The Minitest Project Developers.
+ * Copyright (c) 2014-2019 by The Minitest Project Developers.
  * Some rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
