@@ -23,13 +23,15 @@ import sbt.testing.{Framework => BaseFramework, _}
 class Framework extends BaseFramework {
   def name(): String = "minitest"
 
+  def options: Options = Options()
+
   def fingerprints(): Array[Fingerprint] =
     Array(ModuleFingerprint)
 
   def runner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader): Runner =
-    new minitest.runner.Runner(args, remoteArgs, testClassLoader)
+    new minitest.runner.Runner(args, remoteArgs, options, testClassLoader)
 
-  def slaveRunner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader, send: (String) => Unit): Runner =
+  def slaveRunner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader, send: String => Unit): Runner =
     runner(args, remoteArgs, testClassLoader)
 }
 
