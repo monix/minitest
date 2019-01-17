@@ -152,7 +152,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsLegacyJVM, lawsLegacyJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -197,7 +197,7 @@ lazy val minitestJVM    = minitest.jvm
 lazy val minitestJS     = minitest.js
 lazy val minitestNative = minitest.native
 
-lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("laws"))
+lazy val laws = crossProject(JVMPlatform, JSPlatform).in(file("laws"))
   .dependsOn(minitest)
   .settings(
     name := "minitest-laws",
@@ -210,11 +210,39 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("l
   .jsSettings(
     scalaJSSettings
   )
-  .nativeSettings(
-    nativeSettings
-  )
 
 lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
-// TODO: Enable once ScalaCheck is available for Native code
-// lazy val lawsNative = laws.native
+
+val LegacyScalaCheckVersion = Def.setting {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 =>
+      "1.13.5"
+    case _ =>
+      "1.14.0"
+  }
+}
+
+lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
+  .in(file("laws-legacy"))
+  .dependsOn(minitest)
+  .settings(
+    name := "minitest-laws-legacy",
+    sharedSettings,
+    crossVersionSharedSources,
+    libraryDependencies ++= Seq(
+      "org.scalacheck" %%% "scalacheck" % LegacyScalaCheckVersion.value
+    ),
+    unmanagedSourceDirectories in Compile += {
+      baseDirectory.value.getParentFile / ".." / "laws" / "shared" / "src" / "main" / "scala"
+    },
+    unmanagedSourceDirectories in Test += {
+      baseDirectory.value.getParentFile / ".." / "laws" / "shared" / "src" / "test" / "scala"
+    }
+  )
+  .jsSettings(
+    scalaJSSettings
+  )
+
+lazy val lawsLegacyJVM = lawsLegacy.jvm
+lazy val lawsLegacyJS  = lawsLegacy.js
