@@ -19,6 +19,7 @@ package minitest.runner
 
 import minitest.api._
 import sbt.testing.{Task => BaseTask, _}
+import scala.compat.Platform.EOL
 import scala.concurrent.duration.Duration
 import minitest.platform._
 import scala.util.Try
@@ -35,7 +36,7 @@ final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask
       val withColors = logger.ansiCodesSupported()
       val color = if (withColors) Console.GREEN else ""
       val reset = if (withColors) Console.RESET else ""
-      logger.info(color + name + reset)
+      logger.info(color + name + reset + EOL)
     }
   }
 

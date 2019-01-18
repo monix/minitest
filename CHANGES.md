@@ -1,6 +1,7 @@
-## Version 2.3.1 (Jan 18, 2019)
+## Version 2.3.2 (Jan 18, 2019)
 
 - Changed default value for `useSbtLogging` to `false`
+- Fix output of test names
 
 ## Version 2.3.0 (Jan 17, 2019)
 
