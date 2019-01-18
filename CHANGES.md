@@ -1,3 +1,7 @@
+## Version 2.3.1 (Jan 18, 2019)
+
+- Changed default value for `useSbtLogging` to `false`
+
 ## Version 2.3.0 (Jan 17, 2019)
 
 - Updated Scala to 2.12.8, SBT to 1.2.8, ScalaJS to 0.6.26, Scala Native to 0.3.8
