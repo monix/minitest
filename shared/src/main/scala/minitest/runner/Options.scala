@@ -30,5 +30,5 @@ package minitest.runner
   *        Option inspired by its availability in uTest and other testing frameworks.
   */
 final case class Options(
-  useSbtLogging: Boolean = true
+  useSbtLogging: Boolean = false
 )
