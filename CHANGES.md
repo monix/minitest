@@ -1,3 +1,8 @@
+## Version 2.4.0 (Jan 18, 2019)
+
+- Update to Scala 2.13.0-RC1
+- Update Scala.js to 0.6.27
+
 ## Version 2.3.2 (Jan 18, 2019)
 
 - Changed default value for `useSbtLogging` to `false`
