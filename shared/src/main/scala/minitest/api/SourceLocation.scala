@@ -31,7 +31,7 @@ object SourceLocation {
   implicit def fromContext: SourceLocation =
     macro Macros.fromContext
 
-  @macrocompat.bundle class Macros(val c: whitebox.Context) {
+  class Macros(val c: whitebox.Context) {
     import c.universe._
 
     def fromContext: Tree = {

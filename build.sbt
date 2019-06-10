@@ -29,7 +29,7 @@ addCommandAlias("release", ";+clean ;+minitestNative/clean ;+publishSigned ;+min
 val Scala211 = "2.11.12"
 
 ThisBuild / scalaVersion := "2.12.8"
-ThisBuild / crossScalaVersions := Seq("2.10.7", Scala211, "2.12.8", "2.13.0-RC1")
+ThisBuild / crossScalaVersions := Seq(Scala211, "2.12.8", "2.13.0")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
@@ -134,12 +134,11 @@ lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")
 lazy val requiredMacroCompatDeps = Seq(
   needsScalaParadise := {
     val sv = scalaVersion.value
-    (sv startsWith "2.10.") || (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
+    (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
   },
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
     "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-    "org.typelevel" %% "macro-compat" % "1.1.1",
   ),
   libraryDependencies ++= {
     if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
