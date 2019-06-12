@@ -1,0 +1,39 @@
+version: 2.1
+
+jobs:
+  build:
+    working_directory: ~/minitest
+    docker:
+      - image: openjdk:8
+    environment:
+      SBT_VERSION: 1.2.8
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+                    apt update && apt install -y curl
+                    curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+                    dpkg -i sbt-$SBT_VERSION.deb
+                    rm sbt-$SBT_VERSION.deb
+                    apt-get update
+                    apt-get install -y sbt python-pip git build-essential clang libunwind-dev libgc-dev libre2-dev
+                    curl -sL https://deb.nodesource.com/setup_10.x | bash -
+                    apt-get install -y nodejs
+                    apt-get clean && apt-get autoclean
+
+      - checkout
+      - restore_cache:
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: minitest-cache
+
+      - run:
+          name: Compile and test Minitest
+          working_directory: ~/fama
+          command: cat /dev/null | sbt ci-all
+
+      - save_cache:
+          key: minitest-cache
+          paths:
+            - "~/.ivy2/cache"
+            - "~/.sbt"
+            - "~/.m2"
