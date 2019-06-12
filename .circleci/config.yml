@@ -7,7 +7,7 @@ jobs:
       - image: openjdk:8
     environment:
       SBT_VERSION: 1.2.8
-    resource_class: medium+
+    resource_class: medium
     steps:
       - run:
           name: Install dependencies
@@ -29,8 +29,8 @@ jobs:
 
       - run:
           name: Compile and test Minitest
-          working_directory: ~/fama
-          command: cat /dev/null | sbt ci-all
+          working_directory: ~/minitest
+          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m ci-all
 
       - save_cache:
           key: minitest-cache
