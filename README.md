@@ -4,7 +4,7 @@ A mini testing framework cross-compiled for Scala 2.10, 2.11, 2.12,
 2.13, [Scala.js 0.6.x](http://www.scala-js.org/) and
 [Scala Native 0.3.x](https://www.scala-native.org/).
 
-[![Build Status](https://travis-ci.org/monix/minitest.svg?branch=master)](https://travis-ci.org/monix/minitest)
+[![CircleCI](https://circleci.com/gh/monix/minitest.svg?style=svg)](https://circleci.com/gh/monix/minitest)
 
 ## Usage in SBT
 
