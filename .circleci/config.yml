@@ -8,6 +8,9 @@ jobs:
     environment:
       SBT_VERSION: 1.2.8
     resource_class: medium
+    notify:
+      webhooks:
+        - url: https://webhooks.gitter.im/e/f1a7ec8fc9a34c6a9108
     steps:
       - run:
           name: Install dependencies
