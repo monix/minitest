@@ -1,3 +1,9 @@
+## Version 2.5.0 (Jun 20, 2019)
+
+- Update to Scala 2.13.0 (final)
+- Dropped Scala 2.10 support
+- Dropped usage of `macro-compat`
+
 ## Version 2.4.0 (Jan 18, 2019)
 
 - Update to Scala 2.13.0-RC1
