@@ -19,7 +19,7 @@ import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 // shadow sbt-scalajs' crossProject and CrossType until Scala.js 1.0.0 is released
-import sbtcrossproject.{crossProject, CrossType}
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
@@ -151,7 +151,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsLegacyJVM, lawsLegacyJS)
+  .aggregate(minitestJVM, minitestJS, minitestNative, lawsJVM, lawsJS, lawsNative, lawsLegacyJVM, lawsLegacyJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -180,7 +180,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(NativePlatform)(
     libraryDependencies ++= Seq(
-      "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      "org.portable-scala" %% "portable-scala-reflect" % "0.1.0" % "provided"
     )
   )
   .jsSettings(
@@ -196,14 +196,24 @@ lazy val minitestJVM    = minitest.jvm
 lazy val minitestJS     = minitest.js
 lazy val minitestNative = minitest.native
 
-lazy val laws = crossProject(JVMPlatform, JSPlatform).in(file("laws"))
+lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
+  .crossType(CrossType.Pure)
+  .in(file("laws"))
   .dependsOn(minitest)
   .settings(
     name := "minitest-laws",
     sharedSettings,
-    crossVersionSharedSources,
+    crossVersionSharedSources
+  )
+  .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
       "org.scalacheck" %%% "scalacheck" % "1.14.0"
+    )
+  )
+  .nativeSettings(
+    nativeSettings,
+    libraryDependencies ++= Seq(
+      "com.github.lolgab" %%% "scalacheck" % "1.14.1"
     )
   )
   .jsSettings(
@@ -212,6 +222,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform).in(file("laws"))
 
 lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
+lazy val lawsNative = laws.native
 
 val LegacyScalaCheckVersion = Def.setting {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -223,6 +234,7 @@ val LegacyScalaCheckVersion = Def.setting {
 }
 
 lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
   .in(file("laws-legacy"))
   .dependsOn(minitest)
   .settings(
