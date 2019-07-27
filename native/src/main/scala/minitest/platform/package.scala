@@ -17,9 +17,15 @@
 
 package minitest
 
+import scala.concurrent.ExecutionContext
 import scala.scalanative.testinterface.PreloadedClassLoader
 
 package object platform {
+  val DefaultExecutionContext = new ExecutionContext {
+    def execute(runnable: Runnable): Unit = runnable.run()
+    def reportFailure(cause: Throwable): Unit = cause.printStackTrace()
+  }
+
   type EnableReflectiveInstantiation =
     scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
 
