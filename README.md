@@ -149,7 +149,7 @@ object MyLawsTest extends SimpleTestSuite with Checkers {
     check2((x: Int, y: Int) => x + y == y + x)
   }
 
-  test("addition of integers is transitive") {
+  test("addition of integers is associative") {
     check3((x: Int, y: Int, z: Int) => (x + y) + z == x + (y + z))
   }
 }
