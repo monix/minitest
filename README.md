@@ -23,7 +23,7 @@ this being version `1.14.0`:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.5.0" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "2.6.0" % "test"
 ```
 
 Given that updates for ScalaCheck have been problematic, the ecosystem
@@ -32,7 +32,7 @@ is currently provided for usage with ScalaCheck `1.13.5`:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws-legacy" % "2.5.0" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws-legacy" % "2.6.0" % "test"
 ```
 
 Note that at this time the laws package is not available for Scala
