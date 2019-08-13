@@ -1,3 +1,9 @@
+## Version 2.6.0 (Aug 13, 2019)
+
+- Update Scala Native to 0.3.9
+- Remove `scala.concurrent` stubs (Future, ExecutionContext)
+- Add `assertDoesNotCompile`, taken from Shapeless's `illTyped`
+
 ## Version 2.5.0 (Jun 20, 2019)
 
 - Update to Scala 2.13.0 (final)
