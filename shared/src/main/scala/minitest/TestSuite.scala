@@ -18,7 +18,7 @@
 package minitest
 
 import minitest.api._
-import scala.concurrent.{ExecutionContext, Future}
+import minitest.platform._
 
 trait TestSuite[Env] extends AbstractTestSuite with Asserts {
   def setupSuite(): Unit = ()

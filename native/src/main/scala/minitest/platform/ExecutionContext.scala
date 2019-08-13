@@ -16,7 +16,22 @@
  */
 
 package minitest
+package platform
 
-package object api {
-  val DefaultExecutionContext = minitest.platform.ExecutionContext.global
+/**
+  * Stub needed because Scala Native does not provide an
+  * implementation for [[scala.concurrent.ExecutionContext]] yet.
+  *
+  * Note that this isn't a proper `ExecutionContext` implementation,
+  * just something very simple for compilation to work and
+  * to pass the current tests.
+  */
+trait ExecutionContext
+
+object ExecutionContext {
+  val global: ExecutionContext = new ExecutionContext{}
+
+  object Implicits {
+    implicit val global: ExecutionContext = ExecutionContext.global
+  }
 }

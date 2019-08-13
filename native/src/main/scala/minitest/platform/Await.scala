@@ -16,7 +16,19 @@
  */
 
 package minitest
+package platform
 
-package object api {
-  val DefaultExecutionContext = minitest.platform.ExecutionContext.global
+import scala.concurrent.duration.Duration
+
+/**
+  * Stub needed because Scala Native does not provide an
+  * implementation for [[scala.concurrent.Await]] yet.
+  *
+  * Note that this isn't a proper `Await` implementation,
+  * just something very simple for compilation to work and
+  * to pass the current tests.
+  */
+object Await {
+  def result[A](future: Future[A], duration: Duration): A =
+    future.value.get
 }
