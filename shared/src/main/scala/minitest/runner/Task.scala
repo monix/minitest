@@ -18,11 +18,11 @@
 package minitest.runner
 
 import minitest.api._
-import minitest.platform.loadModule
+import minitest.platform.{Await, loadModule}
 import sbt.testing.{Task => BaseTask, _}
 import scala.compat.Platform.EOL
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
 
 final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask {

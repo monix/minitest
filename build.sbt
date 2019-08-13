@@ -23,7 +23,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
-addCommandAlias("ci-all",  ";+clean ;+test:compile ;+test ;+package")
+addCommandAlias("ci-all",  ";+clean ;+test:compile; +minitestNative/test:compile ;+test ; +minitestNative/test ;+package")
 addCommandAlias("release", ";+clean ;+minitestNative/clean ;+publishSigned ;+minitestNative/publishSigned")
 
 val Scala211 = "2.11.12"
@@ -151,7 +151,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, minitestNative, lawsJVM, lawsJS, lawsNative, lawsLegacyJVM, lawsLegacyJS)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsNative, lawsLegacyJVM, lawsLegacyJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
