@@ -245,10 +245,10 @@ lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
       "org.scalacheck" %%% "scalacheck" % LegacyScalaCheckVersion.value
     ),
     unmanagedSourceDirectories in Compile += {
-      baseDirectory.value.getParentFile / ".." / "laws" / "shared" / "src" / "main" / "scala"
+      baseDirectory.value.getParentFile / ".." / "laws" / "src" / "main" / "scala"
     },
     unmanagedSourceDirectories in Test += {
-      baseDirectory.value.getParentFile / ".." / "laws" / "shared" / "src" / "test" / "scala"
+      baseDirectory.value.getParentFile / ".." / "laws" / "src" / "test" / "scala"
     }
   )
   .jsSettings(
