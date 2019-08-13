@@ -72,10 +72,10 @@ trait Asserts {
   }
 
   def assertDoesNotCompile(code: String): Unit =
-    macro Asserts.IllTypedMacros.applyImplNoExp
+    macro Asserts.DoesNotCompileMacros.applyImplNoExp
 
   def assertDoesNotCompile(code: String, expected: String): Unit =
-    macro Asserts.IllTypedMacros.applyImpl
+    macro Asserts.DoesNotCompileMacros.applyImpl
 
   def intercept[E <: Throwable : ClassTag](callback: => Unit)
     (implicit pos: SourceLocation): Unit = {
@@ -125,7 +125,10 @@ object Asserts extends Asserts {
     loop(0, tpl)
   }
 
-  class IllTypedMacros(val c: whitebox.Context) {
+  /**
+    * Shamelessly copied from Shapeless, copyright by Miles Sabin.
+    */
+  class DoesNotCompileMacros(val c: whitebox.Context) {
     import c.universe._
 
     def applyImplNoExp(code: Tree): Tree = applyImpl(code, null)
