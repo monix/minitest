@@ -25,6 +25,8 @@ import org.portablescala.reflect.Reflect
  * utilities with a platform-specific implementation.
  */
 package object platform {
+  val Await = scala.concurrent.Await
+
   val DefaultExecutionContext = scala.concurrent.ExecutionContext.global
 
   type EnableReflectiveInstantiation =

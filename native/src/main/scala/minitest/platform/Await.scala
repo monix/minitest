@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-package minitest
+package minitest.platform
 
-import scala.concurrent.ExecutionContext
-import scala.scalanative.testinterface.PreloadedClassLoader
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
-package object platform {
-
-  val DefaultExecutionContext = new ExecutionContext {
-    def execute(runnable: Runnable): Unit = runnable.run()
-    def reportFailure(cause: Throwable): Unit = cause.printStackTrace()
+/**
+ * Stub needed because Scala Native's Await is not useful.
+ *
+ * Note that this isn't a proper `Await` implementation,
+ * just something very simple for compilation to work and
+ * to pass the current tests.
+ */
+object Await {
+  def result[A](future: Future[A], duration: Duration): A = {
+    scala.scalanative.runtime.loop()
+    future.value.get.get
   }
-
-  type EnableReflectiveInstantiation =
-    scala.scalajs.reflect.annotation.EnableReflectiveInstantiation
-
-  private[minitest] def loadModule(name: String, loader: ClassLoader): Any =
-    loader.asInstanceOf[PreloadedClassLoader].loadPreloaded(name)
 }
