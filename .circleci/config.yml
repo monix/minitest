@@ -29,9 +29,19 @@ jobs:
           key: minitest-cache
 
       - run:
-          name: Compile and test project
+          name: Compile project for JVM / JS
           working_directory: ~/minitest
-          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m ci-all
+          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +clean +test:compile +package
+
+      - run:
+          name: Run tests for JVM / JS
+          working_directory: ~/minitest
+          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +test
+
+      - run:
+          name: Compile & Test project for Native
+          working_directory: ~/minitest
+          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +minitestNative/clean +minitestNative/test +minitestNative/package
 
       - save_cache:
           key: minitest-cache
