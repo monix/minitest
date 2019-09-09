@@ -22,14 +22,13 @@ import sbt.testing.{Runner => BaseRunner, Task => BaseTask, _}
 final class Runner(
   val args: Array[String],
   val remoteArgs: Array[String],
-  val options: Options,
   classLoader: ClassLoader)
   extends BaseRunner {
 
   def done(): String = ""
 
   def tasks(list: Array[TaskDef]): Array[BaseTask] = {
-    list.map(t => new Task(t, options, classLoader))
+    list.map(t => new Task(t, classLoader))
   }
 
   def receiveMessage(msg: String): Option[String] = {
@@ -40,5 +39,5 @@ final class Runner(
     serializer(task.taskDef())
 
   def deserializeTask(task: String, deserializer: String => TaskDef): BaseTask =
-    new Task(deserializer(task), options, classLoader)
+    new Task(deserializer(task), classLoader)
 }

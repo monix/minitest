@@ -28,8 +28,8 @@ addCommandAlias("release", ";+clean ;+minitestNative/clean ;+package ;+minitestN
 
 val Scala211 = "2.11.12"
 
-ThisBuild / scalaVersion := "2.12.8"
-ThisBuild / crossScalaVersions := Seq(Scala211, "2.12.8", "2.13.0")
+ThisBuild / scalaVersion := "2.12.9"
+ThisBuild / crossScalaVersions := Seq(Scala211, "2.12.9", "2.13.0")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =

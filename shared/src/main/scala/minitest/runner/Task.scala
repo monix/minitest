@@ -25,15 +25,14 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
 
-final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask {
+final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   implicit val ec: ExecutionContext = DefaultExecutionContext
-  private[this] val console = if (opts.useSbtLogging) None else Some(Array(new ConsoleLogger))
 
   def tags(): Array[String] = Array.empty
   def taskDef(): TaskDef = task
 
   def reportStart(name: String, loggers: Array[Logger]): Unit = {
-    for (logger <- console.getOrElse(loggers)) {
+    for (logger <- loggers) {
       val withColors = logger.ansiCodesSupported()
       val color = if (withColors) Console.GREEN else ""
       val reset = if (withColors) Console.RESET else ""
@@ -42,7 +41,7 @@ final class Task(task: TaskDef, opts: Options, cl: ClassLoader) extends BaseTask
   }
 
   def report(name: String, r: Result[_], loggers: Array[Logger]): Unit = {
-    for (logger <- console.getOrElse(loggers)) {
+    for (logger <- loggers) {
       logger.info(r.formatted(name, logger.ansiCodesSupported()))
     }
   }

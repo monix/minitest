@@ -1,3 +1,9 @@
+## Version 2.7.0 (Sep 9, 2019)
+
+- Update sbt to 1.3.0
+- Update Scala to 2.12.9
+- Remove console hack
+
 ## Version 2.6.0 (Aug 13, 2019)
 
 - Update Scala Native to 0.3.9
