@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{blocking, ExecutionContext, Future, Promise}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
@@ -32,7 +32,7 @@ object TestSpec {
     (implicit ec: ExecutionContext): TestSpec[Env, Unit] =
     TestSpec(name,  { env =>
       val f: Future[Unit] =
-        try cb(env)
+        try blocking(cb(env))
         catch { case NonFatal(ex) => Future.failed(ex) }
 
       val p = Promise[Result[Unit]]()
@@ -48,7 +48,7 @@ object TestSpec {
   def sync[Env](name: String, cb: Env => Void): TestSpec[Env, Unit] =
     TestSpec(name, { env =>
       try {
-        cb(env) match {
+        blocking(cb(env)) match {
           case Void.UnitRef =>
             Future.successful(Result.Success(()))
           case Void.Caught(ref, loc) =>
