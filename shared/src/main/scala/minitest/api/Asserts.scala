@@ -78,7 +78,7 @@ trait Asserts {
     macro Asserts.DoesNotCompileMacros.applyImpl
 
   def intercept[E <: Throwable : ClassTag](callback: => Unit)
-    (implicit pos: SourceLocation): Unit = {
+    (implicit pos: SourceLocation): Throwable = {
 
     val E = implicitly[ClassTag[E]]
     try {
@@ -89,7 +89,7 @@ trait Asserts {
       case ex: InterceptException =>
         throw new AssertionException(ex.getMessage, pos)
       case ex: Throwable if E.runtimeClass.isInstance(ex) =>
-        () // Do nothing!
+        ex
     }
   }
 
