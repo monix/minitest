@@ -27,9 +27,12 @@ addCommandAlias("ci-all",  ";+clean ;+test:compile; +minitestNative/test:compile
 addCommandAlias("release", ";+clean ;+minitestNative/clean ;+package ;+minitestNative/package ;+publishSigned ;+minitestNative/publishSigned")
 
 val Scala211 = "2.11.12"
+val Scala212 = "2.12.10"
 
-ThisBuild / scalaVersion := "2.12.9"
-ThisBuild / crossScalaVersions := Seq(Scala211, "2.12.9", "2.13.0")
+val ScalaCheckVersion = "1.14.3"
+
+ThisBuild / scalaVersion := Scala212
+ThisBuild / crossScalaVersions := Seq(Scala211, Scala212, "2.13.1")
 
 def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
 lazy val crossVersionSharedSources: Seq[Setting[_]] =
@@ -172,7 +175,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %%% "portable-scala-reflect" % "0.1.0"
+      "org.portable-scala" %%% "portable-scala-reflect" % "0.1.1"
     ),
     unmanagedSourceDirectories in Compile += {
       (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
@@ -207,7 +210,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   )
   .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.0"
+      "org.scalacheck" %%% "scalacheck" % ScalaCheckVersion
     )
   )
   .nativeSettings(
@@ -224,15 +227,6 @@ lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
 lazy val lawsNative = laws.native
 
-val LegacyScalaCheckVersion = Def.setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 =>
-      "1.13.5"
-    case _ =>
-      "1.14.0"
-  }
-}
-
 lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("laws-legacy"))
@@ -242,7 +236,7 @@ lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
     sharedSettings,
     crossVersionSharedSources,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % LegacyScalaCheckVersion.value
+      "org.scalacheck" %%% "scalacheck" % ScalaCheckVersion
     ),
     unmanagedSourceDirectories in Compile += {
       baseDirectory.value.getParentFile / ".." / "laws" / "src" / "main" / "scala"
