@@ -1,0 +1,62 @@
+name: release
+
+on:
+  push:
+    tags: ["v[0-9]+*"]
+
+jobs:
+  publish_sonatype:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: olafurpg/setup-scala@v2
+
+      - name: Install GnuPG2
+        run: |
+          sudo apt-get update && sudo apt-get -y install gnupg2
+          mkdir ~/.gnupg && chmod 700 ~/.gnupg
+          echo use-agent >> ~/.gnupg/gpg.conf
+          echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+          echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+          chmod 600 ~/.gnupg/*
+          echo RELOADAGENT | gpg-connect-agent
+          echo $PGP_SECRET | base64 --decode | gpg --import --no-tty --batch --yes
+        env:
+          PGP_SECRET: ${{secrets.PGP_SECRET}}
+
+      - name: Publish to Sonatype (default versions)
+        run: csbt +clean ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+      # - name: Publish to Sonatype (Scala.js 1.0)
+      #   run: csbt +clean ci-release
+      #   env:
+      #     SCALAJS_VERSION: 1.0.0-RC2
+      #     PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+      #     PGP_SECRET: ${{ secrets.PGP_SECRET }}
+      #     SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      #     SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+  publish_microsite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: olafurpg/setup-scala@v2
+
+      - name: Set up Ruby 2.6 (for microsite)
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install microsite dependencies
+        run: |
+          bundle install --system --gemfile=site/Gemfile
+
+      - name: Publish Website
+        run: csbt +clean site/publishMicrosite
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

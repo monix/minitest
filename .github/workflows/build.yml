@@ -1,0 +1,22 @@
+name: build
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set up Ruby 2.6 (for microsite)
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install microsite dependencies
+        run: |
+          bundle install --system --gemfile=site/Gemfile
+
+      - name: Compile and test
+        run: |
+          sbt ci

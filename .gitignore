@@ -1,6 +1,8 @@
+benchmarks/results
 test-output/
 TODO
-.*
+!/.gitignore
+!/.scalafmt.conf
 .tags*
 .idea*
 *.log
@@ -8,21 +10,10 @@ TODO
 target/
 /.lib/
 project/target/
-*.class
-*.log
-*.iml
-
-# sbt specific
-.cache/
-.history/
-.lib/
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
+.classpath
+TAGS
+.tags
+project/metals.sbt
+.metals
+.bloop
+site/Gemfile.lock

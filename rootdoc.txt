@@ -1,0 +1,6 @@
+The super light testing library for pragmatic FP Scala.
+
+Links:
+
+ - [[https://minitest.monix.io/ Homepage]]
+ - [[https://github.com/monix/minitest GitHub repository]]

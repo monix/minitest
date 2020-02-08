@@ -1,80 +1,116 @@
-/*
- * Copyright (c) 2014-2019 by The Minitest Project Developers.
- * Some rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import BuildKeys._
+import Boilerplate._
 
-import sbt._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-// shadow sbt-scalajs' crossProject and CrossType until Scala.js 1.0.0 is released
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
-import sbt.Keys._
-import com.typesafe.sbt.GitVersioning
+import sbtcrossproject.CrossProject
 
-addCommandAlias("ci-all",  ";+clean ;+test:compile; +minitestNative/test:compile ;+test ; +minitestNative/test ;+package")
-addCommandAlias("release", ";+clean ;+minitestNative/clean ;+package ;+minitestNative/package ;+publishSigned ;+minitestNative/publishSigned")
+// ---------------------------------------------------------------------------
+// Commands
 
-val Scala211 = "2.11.12"
-val Scala212 = "2.12.10"
-val Scala213 = "2.13.1"
+addCommandAlias("release", ";+clean ;ci-release ;unidoc ;microsite/publishMicrosite")
+addCommandAlias("ci", ";project root ;reload ;+clean ;+test:compile ;+test ;+package ;unidoc ;site/makeMicrosite")
 
-ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala211, Scala212, Scala213)
+// ---------------------------------------------------------------------------
+// Dependencies
 
-def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
-lazy val crossVersionSharedSources: Seq[Setting[_]] =
-  Seq(Compile, Test).map { sc =>
-    (unmanagedSourceDirectories in sc) ++= {
-      (unmanagedSourceDirectories in sc).value.map { dir =>
-        scalaPartV.value match {
-          case Some((major, minor)) =>
-            new File(dir.getPath + s"_$major.$minor")
-          case None =>
-            throw new NoSuchElementException("Scala version")
-        }
-      }
-    }
+/** Standard FP library for Scala:
+  * [[https://typelevel.org/cats/]]
+  */
+val CatsVersion = "2.1.0"
+
+/** FP library for describing side-effects:
+  * [[https://typelevel.org/cats-effect/]]
+  */
+val CatsEffectVersion = "2.1.1"
+
+/** Newtype (opaque type) definitions:
+  * [[https://github.com/estatico/scala-newtype]]
+  */
+val NewtypeVersion = "0.4.3"
+
+/** First-class support for type-classes:
+  * [[https://github.com/typelevel/simulacrum]]
+  */
+val SimulacrumVersion = "1.0.0"
+
+/** For macros that are supported on older Scala versions.
+  * Not needed starting with Scala 2.13.
+  */
+val MacroParadiseVersion = "2.1.0"
+
+/** Library for unit-testing:
+  * [[https://github.com/monix/minitest/]]
+  */
+val MinitestVersion = "2.7.0"
+
+/** Library for property-based testing:
+  * [[https://www.scalacheck.org/]]
+  */
+val ScalaCheckVersion = "1.14.1"
+
+/** Compiler plugin for working with partially applied types:
+  * [[https://github.com/typelevel/kind-projector]]
+  */
+val KindProjectorVersion = "0.11.0"
+
+/** Compiler plugin for fixing "for comprehensions" to do desugaring w/o `withFilter`:
+  * [[https://github.com/typelevel/kind-projector]]
+  */
+val BetterMonadicForVersion = "0.3.1"
+
+/** Compiler plugin for silencing compiler warnings:
+  * [[https://github.com/ghik/silencer]]
+  */
+val SilencerVersion = "1.4.4"
+
+/**
+  * Defines common plugins between all projects.
+  */
+def defaultPlugins: Project ⇒ Project = pr => {
+  val withCoverage = sys.env.getOrElse("SBT_PROFILE", "") match {
+    case "coverage" => pr
+    case _ => pr.disablePlugins(scoverage.ScoverageSbtPlugin)
   }
-
-lazy val scalaLinterOptions =
-  Seq(
-    // Enables linter options
-    "-Xlint:adapted-args", // warn if an argument list is modified to match the receiver
-    "-Xlint:nullary-unit", // warn when nullary methods return Unit
-    "-Xlint:inaccessible", // warn about inaccessible types in method signatures
-    "-Xlint:nullary-override", // warn when non-nullary `def f()' overrides nullary `def f'
-    "-Xlint:infer-any", // warn when a type argument is inferred to be `Any`
-    "-Xlint:missing-interpolator", // a string literal appears to be missing an interpolator id
-    "-Xlint:doc-detached", // a ScalaDoc comment appears to be detached from its element
-    "-Xlint:private-shadow", // a private field (or class parameter) shadows a superclass field
-    "-Xlint:type-parameter-shadow", // a local type parameter shadows a type already in scope
-    "-Xlint:poly-implicit-overload", // parameterized overloaded implicit methods are not visible as view bounds
-    "-Xlint:option-implicit", // Option.apply used implicit view
-    "-Xlint:delayedinit-select", // Selecting member of DelayedInit
-    "-Xlint:package-object-classes", // Class or object defined in package object
-  )
-
-lazy val scalaTwoTwelveDeprecatedOptions =
-  Seq(
-    // Deprecated in 2.12, removed in 2.13
-    "-Ywarn-inaccessible",
-    "-Ywarn-nullary-override",
-    "-Ywarn-nullary-unit"
-  )
+  withCoverage
+    .enablePlugins(AutomateHeaderPlugin)
+    .enablePlugins(GitBranchPrompt)
+}
 
 lazy val sharedSettings = Seq(
+  projectTitle := "Minitest",
+  projectWebsiteRootURL := "https://minitest.monix.io/",
+  projectWebsiteBasePath := "/",
+  githubOwnerID := "monix",
+  githubRelativeRepositoryID := "minitest",
+
+  organization := "io.monix",
+  scalaVersion := "2.13.1",
+  crossScalaVersions := Seq("2.12.10", "2.13.1"),
+
+  // More version specific compiler options
+  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 =>
+      Seq(
+        "-Ypartial-unification",
+      )
+    case _ =>
+      Seq(
+        // Replaces macro-paradise in Scala 2.13
+        "-Ymacro-annotations",
+      )
+  }),
+
+    // Turning off fatal warnings for doc generation
+  scalacOptions.in(Compile, doc) ~= filterConsoleScalacOptions,
+  // Silence all warnings from src_managed files
+  scalacOptions += "-P:silencer:pathFilters=.*[/]src_managed[/].*",
+
+  addCompilerPlugin("org.typelevel" % "kind-projector" % KindProjectorVersion cross CrossVersion.full),
+  addCompilerPlugin("com.olegpy" %% "better-monadic-for" % BetterMonadicForVersion),
+  addCompilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
+
+  // ScalaDoc settings
+  autoAPIMappings := true,
   scalacOptions in ThisBuild ++= Seq(
     // Note, this is used by the doc-source-url feature to determine the
     // relative path of a given source file. If it's not a prefix of a the
@@ -84,178 +120,193 @@ lazy val sharedSettings = Seq(
     "-sourcepath", file(".").getAbsolutePath.replaceAll("[.]$", "")
   ),
 
-  scalacOptions ++= Seq(
-    "-unchecked", "-deprecation", "-feature", "-Xlint",
-    "-Ywarn-dead-code",
-    "-Xlog-free-terms"
-  ),
+  // https://github.com/sbt/sbt/issues/2654
+  incOptions := incOptions.value.withLogRecompileOnMacro(false),
 
-  // Version specific options
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v >= 12 =>
-      scalaLinterOptions
-    case Some((2, 12)) =>
-      scalaLinterOptions ++ scalaTwoTwelveDeprecatedOptions
-    case Some((2, 11)) =>
-      scalaLinterOptions ++ Seq("-target:jvm-1.6") ++ scalaTwoTwelveDeprecatedOptions
-    case _ =>
-      Seq("-target:jvm-1.6")
-  }),
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 11 | 12)) =>
-      Seq(
-        "-Xlint:unsound-match", // Pattern match may not be typesafe
-        "-Xlint:by-name-right-associative", // By-name parameter of right associative operator
-        "-Ywarn-adapted-args"
-      )
-    case _ =>
-      Nil
-  }),
+  // ---------------------------------------------------------------------------
+  // Options for testing
 
-  resolvers ++= Seq(
-    "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases",
-    Resolver.sonatypeRepo("releases")
-  ),
+  testFrameworks += new TestFramework("minitest.runner.Framework"),
+  logBuffered in Test := false,
+  logBuffered in IntegrationTest := false,
+  // Disables parallel execution
+  parallelExecution in Test := false,
+  parallelExecution in IntegrationTest := false,
+  testForkedParallel in Test := false,
+  testForkedParallel in IntegrationTest := false,
+  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1),
 
-  testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
+  // ---------------------------------------------------------------------------
+  // Options meant for publishing on Maven Central
+
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false }, // removes optional dependencies
+
+  licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  homepage := Some(url(projectWebsiteFullURL.value)),
+  headerLicense := Some(HeaderLicense.Custom(
+    s"""|Copyright (c) 2020 the ${projectTitle.value} contributors.
+        |See the project homepage at: ${projectWebsiteFullURL.value}
+        |
+        |Licensed under the Apache License, Version 2.0 (the "License");
+        |you may not use this file except in compliance with the License.
+        |You may obtain a copy of the License at
+        |
+        |    http://www.apache.org/licenses/LICENSE-2.0
+        |
+        |Unless required by applicable law or agreed to in writing, software
+        |distributed under the License is distributed on an "AS IS" BASIS,
+        |WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        |See the License for the specific language governing permissions and
+        |limitations under the License."""
+      .stripMargin)),
+
+  scmInfo := Some(
+    ScmInfo(
+      url(s"https://github.com/${githubFullRepositoryID.value}"),
+      s"scm:git@github.com:${githubFullRepositoryID.value}.git"
+    )),
+
+  developers := List(
+    Developer(
+      id="alexelcu",
+      name="Alexandru Nedelcu",
+      email="noreply@alexn.org",
+      url=url("https://alexn.org")
+    )),
+
+  // -- Settings meant for deployment on oss.sonatype.org
+  sonatypeProfileName := organization.value,
 )
 
-lazy val scalaJSSettings = Seq(
-  scalaJSStage in Test := FastOptStage
-)
-
-lazy val nativeSettings = Seq(
-  scalaVersion := Scala211,
-  crossScalaVersions := Seq(Scala211),
-  publishConfiguration := publishConfiguration.value.withOverwrite(true),
-  publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
-)
-
-lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")
-
-lazy val requiredMacroCompatDeps = Seq(
-  needsScalaParadise := {
-    val sv = scalaVersion.value
-    (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
-  },
-  libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-  ),
-  libraryDependencies ++= {
-    if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
-    else Nil
-  },
-  scalacOptions ++= {
-    if (needsScalaParadise.value) Nil
-    else Seq("-Ymacro-annotations")
-  }
-)
-
-lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsNative, lawsLegacyJVM, lawsLegacyJS)
-  .settings(
-    name := "minitest root",
-    Compile / sources := Nil,
-    skip in publish := true,
-  )
-
-lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("."))
-  .settings(
-    name := "minitest",
-    sharedSettings,
-    crossVersionSharedSources,
-    requiredMacroCompatDeps
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-sbt" % "test-interface" % "1.0"
-    ),
-  )
-  .platformsSettings(JVMPlatform, JSPlatform)(
-    libraryDependencies ++= Seq(
-      "org.portable-scala" %%% "portable-scala-reflect" % "0.1.0"
-    ),
-    unmanagedSourceDirectories in Compile += {
-      (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
+/**
+  * Shared configuration across all sub-projects with actual code to be published.
+  */
+def defaultCrossProjectConfiguration(pr: CrossProject) = {
+  val sharedJavascriptSettings = Seq(
+    coverageExcludedFiles := ".*",
+    // Use globally accessible (rather than local) source paths in JS source maps
+    scalacOptions += {
+      val tagOrHash = {
+        val ver = s"v${version.value}"
+        if (isSnapshot.value)
+          git.gitHeadCommit.value.getOrElse(ver)
+        else
+          ver
+      }
+      val l = (baseDirectory in LocalRootProject).value.toURI.toString
+      val g = s"https://raw.githubusercontent.com/${githubFullRepositoryID.value}/$tagOrHash/"
+      s"-P:scalajs:mapSourceURI:$l->$g"
     }
   )
-  .platformsSettings(NativePlatform)(
-    libraryDependencies ++= Seq(
-      "org.portable-scala" %% "portable-scala-reflect" % "0.1.0" % "provided"
-    )
-  )
-  .jsSettings(
-    scalaJSSettings,
-    libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
-  )
-  .nativeSettings(
-    nativeSettings,
-    libraryDependencies += "org.scala-native" %%% "test-interface" % nativeVersion
+
+  val sharedJVMSettings = Seq(
+    skip.in(publish) := customScalaJSVersion.isDefined
   )
 
-lazy val minitestJVM    = minitest.jvm
-lazy val minitestJS     = minitest.js
-lazy val minitestNative = minitest.native
-
-lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
-  .crossType(CrossType.Pure)
-  .in(file("laws"))
-  .dependsOn(minitest)
-  .settings(
-    name := "minitest-laws",
-    sharedSettings,
-    crossVersionSharedSources
-  )
-  .platformsSettings(JVMPlatform, JSPlatform)(
-    libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.0"
-    )
-  )
-  .nativeSettings(
-    nativeSettings,
-    libraryDependencies ++= Seq(
-      "com.github.lolgab" %%% "scalacheck" % "1.14.1"
-    )
-  )
-  .jsSettings(
-    scalaJSSettings
-  )
-
-lazy val lawsJVM    = laws.jvm
-lazy val lawsJS     = laws.js
-lazy val lawsNative = laws.native
-
-val LegacyScalaCheckVersion = Def.setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 =>
-      "1.13.5"
-    case _ =>
-      "1.14.0"
-  }
+  pr.configure(defaultPlugins)
+    .settings(sharedSettings)
+    .jsSettings(sharedJavascriptSettings)
+    .jvmSettings(doctestTestSettings(DoctestTestFramework.Minitest))
+    .jvmSettings(sharedJVMSettings)
+    .settings(crossVersionSharedSources)
+    .settings(requiredMacroCompatDeps(MacroParadiseVersion))
+    .settings(filterOutMultipleDependenciesFromGeneratedPomXml(
+      "groupId" -> "org.scoverage".r :: Nil,
+      "groupId" -> "io.estatico".r   :: "artifactId" -> "newtype".r    :: Nil,
+      "groupId" -> "org.typelevel".r :: "artifactId" -> "simulacrum".r :: Nil,
+    ))
 }
 
-lazy val lawsLegacy = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("laws-legacy"))
-  .dependsOn(minitest)
+lazy val root = project.in(file("."))
+  .enablePlugins(ScalaUnidocPlugin)
+  .aggregate(coreJVM, coreJS)
+  .configure(defaultPlugins)
+  .settings(sharedSettings)
+  .settings(doNotPublishArtifact)
+  .settings(unidocSettings(coreJVM))
   .settings(
-    name := "minitest-laws-legacy",
-    sharedSettings,
-    crossVersionSharedSources,
-    libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % LegacyScalaCheckVersion.value
-    ),
-    unmanagedSourceDirectories in Compile += {
-      baseDirectory.value.getParentFile / ".." / "laws" / "src" / "main" / "scala"
-    },
-    unmanagedSourceDirectories in Test += {
-      baseDirectory.value.getParentFile / ".." / "laws" / "src" / "test" / "scala"
-    }
-  )
-  .jsSettings(
-    scalaJSSettings
+    // Try really hard to not execute tasks in parallel ffs
+    Global / concurrentRestrictions := Tags.limitAll(1) :: Nil,
   )
 
-lazy val lawsLegacyJVM = lawsLegacy.jvm
-lazy val lawsLegacyJS  = lawsLegacy.js
+lazy val site = project.in(file("site"))
+  .disablePlugins(MimaPlugin)
+  .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)
+  .settings(sharedSettings)
+  .settings(doNotPublishArtifact)
+  .dependsOn(coreJVM)
+  .settings {
+    import microsites._
+    Seq(
+      micrositeName := projectTitle.value,
+      micrositeDescription := "The super light testing library for pragmatic FP Scala.",
+      micrositeAuthor := "Alexandru Nedelcu",
+      micrositeTwitterCreator := "@alexelcu",
+      micrositeGithubOwner := githubOwnerID.value,
+      micrositeGithubRepo := githubRelativeRepositoryID.value,
+      micrositeUrl := projectWebsiteRootURL.value.replaceAll("[/]+$", ""),
+      micrositeBaseUrl := projectWebsiteBasePath.value.replaceAll("[/]+$", ""),
+      micrositeDocumentationUrl := s"${projectWebsiteFullURL.value.replaceAll("[/]+$", "")}/${docsMappingsAPIDir.value}/",
+      micrositeGitterChannelUrl := githubFullRepositoryID.value,
+      micrositeFooterText := None,
+      micrositeHighlightTheme := "atom-one-light",
+      micrositePalette := Map(
+        "brand-primary" -> "#3e5b95",
+        "brand-secondary" -> "#294066",
+        "brand-tertiary" -> "#2d5799",
+        "gray-dark" -> "#49494B",
+        "gray" -> "#7B7B7E",
+        "gray-light" -> "#E5E5E6",
+        "gray-lighter" -> "#F4F3F4",
+        "white-color" -> "#FFFFFF"
+      ),
+      micrositeCompilingDocsTool := WithMdoc,
+      fork in mdoc := true,
+      scalacOptions.in(Tut) ~= filterConsoleScalacOptions,
+      libraryDependencies += "com.47deg" %% "github4s" % "0.21.0",
+      micrositePushSiteWith := GitHub4s,
+      micrositeGithubToken := sys.env.get("GITHUB_TOKEN"),
+      micrositeExtraMdFiles := Map(
+        file("CODE_OF_CONDUCT.md") -> ExtraMdFileConfig("CODE_OF_CONDUCT.md", "page", Map("title" -> "Code of Conduct",   "section" -> "code of conduct", "position" -> "100")),
+        file("LICENSE.md") -> ExtraMdFileConfig("LICENSE.md", "page", Map("title" -> "License",   "section" -> "license",   "position" -> "101"))
+      ),
+      docsMappingsAPIDir := s"api",
+      addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, docsMappingsAPIDir),
+      sourceDirectory in Compile := baseDirectory.value / "src",
+      sourceDirectory in Test := baseDirectory.value / "test",
+      mdocIn := (sourceDirectory in Compile).value / "mdoc",
+
+      // Bug in sbt-microsites
+      micrositeConfigYaml := microsites.ConfigYml(
+        yamlCustomProperties = Map("exclude" -> List.empty[String])
+      ),
+    )
+  }
+
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("core"))
+  .configureCross(defaultCrossProjectConfiguration)
+  .settings(
+    name := "minitest-core",
+    libraryDependencies ++= Seq(
+      "io.estatico"    %%% "newtype"          % NewtypeVersion % Provided,
+      "org.typelevel"  %%% "simulacrum"       % SimulacrumVersion % Provided,
+      "org.typelevel"  %%% "cats-core"        % CatsVersion,
+      "org.typelevel"  %%% "cats-effect"      % CatsEffectVersion,
+      // For testing
+      "io.monix"       %%% "minitest"         % MinitestVersion % Test,
+      "io.monix"       %%% "minitest-laws"    % MinitestVersion % Test,
+      "org.scalacheck" %%% "scalacheck"       % ScalaCheckVersion % Test,
+      "org.typelevel"  %%% "cats-laws"        % CatsVersion % Test,
+      "org.typelevel"  %%% "cats-effect-laws" % CatsEffectVersion % Test,
+    ),
+  )
+
+lazy val coreJVM = core.jvm
+lazy val coreJS  = core.js
+
+// Reloads build.sbt changes whenever detected
+Global / onChangedBuildSource := ReloadOnSourceChanges
