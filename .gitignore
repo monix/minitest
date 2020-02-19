@@ -26,3 +26,6 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
+# Scala Native
+lowered.hnir

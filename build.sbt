@@ -23,12 +23,18 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
-addCommandAlias("ci-all",  ";+clean ;+test:compile; +minitestNative/test:compile ;+test ; +minitestNative/test ;+package")
-addCommandAlias("release", ";+clean ;+minitestNative/clean ;+package ;+minitestNative/package ;+publishSigned ;+minitestNative/publishSigned")
+addCommandAlias("test-js-1",      ";+clean ;+minitestJS/test ;+lawsJS/test ;+minitestJS/test ;+lawsJS/test")
+addCommandAlias("test-native",    ";+clean ;+minitestNative/test ;+lawsNative/test ;+package")
+addCommandAlias("test-all",       ";+clean ;+test:compile; ;+test ;+package")
+addCommandAlias("release-js-1",   ";+minitestJS/clean ;+lawsJS/clean ;+minitestJS/package ;+lawsJS/package ;+minitestJS/publishSigned ;+lawsJS/publishSigned")
+addCommandAlias("release-native", ";+minitestNative/clean ;+lawsNative/clean ;+minitestNative/package ;+lawsNative/package ;+minitestNative/publishSigned ;+lawsNative/publishSigned")
+addCommandAlias("release",        ";+clean ;+package ;+publishSigned")
 
 val Scala211 = "2.11.12"
 val Scala212 = "2.12.10"
 val Scala213 = "2.13.1"
+
+val PortableScalaReflect = "0.1.1"
 
 ThisBuild / scalaVersion := Scala212
 ThisBuild / crossScalaVersions := Seq(Scala211, Scala212, Scala213)
@@ -153,7 +159,7 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsNative, lawsLegacyJVM, lawsLegacyJS)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsLegacyJVM, lawsLegacyJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
@@ -174,7 +180,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %%% "portable-scala-reflect" % "0.1.0"
+      "org.portable-scala" %%% "portable-scala-reflect" % PortableScalaReflect
     ),
     unmanagedSourceDirectories in Compile += {
       (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
@@ -182,7 +188,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(NativePlatform)(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %% "portable-scala-reflect" % "0.1.0" % "provided"
+      "org.portable-scala" %% "portable-scala-reflect" % PortableScalaReflect % "provided"
     )
   )
   .jsSettings(
@@ -205,22 +211,11 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   .settings(
     name := "minitest-laws",
     sharedSettings,
-    crossVersionSharedSources
+    crossVersionSharedSources,
+    libraryDependencies += "org.scalacheck" %%% "scalacheck" % "1.14.3"
   )
-  .platformsSettings(JVMPlatform, JSPlatform)(
-    libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.0"
-    )
-  )
-  .nativeSettings(
-    nativeSettings,
-    libraryDependencies ++= Seq(
-      "com.github.lolgab" %%% "scalacheck" % "1.14.1"
-    )
-  )
-  .jsSettings(
-    scalaJSSettings
-  )
+  .nativeSettings(nativeSettings)
+  .jsSettings(scalaJSSettings)
 
 lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
