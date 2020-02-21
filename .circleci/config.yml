@@ -1,5 +1,5 @@
 # N.B. with 2.1 the webhook notification no longer works
-version: 2.0
+version: 2.1
 
 jobs:
   build:
@@ -9,6 +9,9 @@ jobs:
     environment:
       SBT_VERSION: 1.3.4
     resource_class: medium
+    parameters:
+      scalajsVersion:
+        type: string
     steps:
       - run:
           name: Install dependencies
@@ -31,12 +34,12 @@ jobs:
       - run:
           name: Compile project for JVM / JS
           working_directory: ~/minitest
-          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +clean +test:compile +package
+          command: cat /dev/null | SCALAJS_VERSION=<< parameters.scalajsVersion >> sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +clean +test:compile +package
 
       - run:
           name: Run tests for JVM / JS
           working_directory: ~/minitest
-          command: cat /dev/null | sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +test
+          command: cat /dev/null | SCALAJS_VERSION=<< parameters.scalajsVersion >> sbt -J-Xmx3072m -J-XX:MaxMetaspaceSize=1024m +test
 
       - run:
           name: Compile & Test project for Native
@@ -50,6 +53,20 @@ jobs:
             - "~/.sbt"
             - "~/.m2"
 
+build_jobs: &build_jobs
+  - build:
+      name:  Scala.js 0.6.x
+      scalajsVersion: 0.6.31
+  - build:
+      name:  Scala.js 1.x
+      scalajsVersion: 1.0.0
+
+workflows:
+  version: 2
+  
+  build:
+    jobs: *build_jobs
+    
 notify:
   webhooks:
     - url: https://webhooks.gitter.im/e/f1a7ec8fc9a34c6a9108

@@ -1,6 +1,6 @@
-val crossProjVersion = "0.6.1"
+val crossProjVersion = "1.0.0"
 val scalaJSVersion =
-  Option(System.getenv("SCALAJS_VERSION")).getOrElse("0.6.31")
+  Option(System.getenv("SCALAJS_VERSION")).getOrElse("1.0.0")
 val scalaNativeVersion =
   Option(System.getenv("SCALANATIVE_VERSION")).getOrElse("0.3.9")
 

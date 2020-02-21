@@ -174,7 +174,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %%% "portable-scala-reflect" % "0.1.0"
+      "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
     ),
     unmanagedSourceDirectories in Compile += {
       (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
@@ -182,7 +182,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
   )
   .platformsSettings(NativePlatform)(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %% "portable-scala-reflect" % "0.1.0" % "provided"
+      "org.portable-scala" %% "portable-scala-reflect" % "1.0.0" % "provided"
     )
   )
   .jsSettings(
@@ -209,7 +209,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
   )
   .platformsSettings(JVMPlatform, JSPlatform)(
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.0"
+      "org.scalacheck" %%% "scalacheck" % "1.14.3"
     )
   )
   .nativeSettings(
