@@ -52,24 +52,12 @@ ThisBuild / isSnapshot := {
 ThisBuild / Test / publishArtifact := false
 ThisBuild / pomIncludeRepository := { _ => false } // removes optional dependencies
 
-// For evicting Scoverage out of the generated POM
-// See: https://github.com/scoverage/sbt-scoverage/issues/153
-ThisBuild / pomPostProcess := { (node: xml.Node) =>
-  new RuleTransformer(new RewriteRule {
-    override def transform(node: xml.Node): Seq[xml.Node] = node match {
-      case e: Elem
-        if e.label == "dependency" && e.child.exists(child => child.label == "groupId" && child.text == "org.scoverage") => Nil
-      case _ => Seq(node)
-    }
-  }).transform(node).head
-}
-
 enablePlugins(GitVersioning)
 
 /* The BaseVersion setting represents the in-development (upcoming) version,
  * as an alternative to SNAPSHOTS.
  */
-git.baseVersion := "2.8.0"
+git.baseVersion := "2.8.2"
 
 val ReleaseTag = """^v(\d+\.\d+\.\d+(?:[-.]\w+)?)$""".r
 git.gitTagToVersionNumber := {
