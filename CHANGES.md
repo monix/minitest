@@ -1,3 +1,8 @@
+## Version 2.8.1 (Apr 5, 2020)
+
+- Add Scala Native 0.3.9 release missing from `2.8.0`
+- Release for Scala Native 0.4.0-M2
+
 ## Version 2.8.0 (Apr 5, 2020)
 
 - Update ScalaJS to 0.6.32 and 1.0.0
