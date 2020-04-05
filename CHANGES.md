@@ -1,3 +1,8 @@
+## Version 2.8.0 (Apr 5, 2020)
+
+- Update ScalaJS to 0.6.32 and 1.0.0
+- Changes the signature of `intercept` to return the Throwable
+
 ## Version 2.7.0 (Sep 9, 2019)
 
 - Update sbt to 1.3.0

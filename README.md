@@ -1,7 +1,7 @@
 # Minitest
 
 A mini testing framework cross-compiled for Scala 2.11, 2.12,
-2.13, [Scala.js 0.6.x](http://www.scala-js.org/) and
+2.13, [Scala.js 0.6.x & 1.0.x](http://www.scala-js.org/) and
 [Scala Native 0.3.x](https://www.scala-native.org/).
 
 [![CircleCI](https://circleci.com/gh/monix/minitest.svg?style=svg)](https://circleci.com/gh/monix/minitest)
@@ -12,7 +12,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "2.7.0" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "2.8.0" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -23,7 +23,7 @@ this being version `1.14.0`:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.7.0" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "2.8.0" % "test"
 ```
 
 Given that updates for ScalaCheck have been problematic, the ecosystem
