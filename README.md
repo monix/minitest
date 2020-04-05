@@ -2,7 +2,7 @@
 
 A mini testing framework cross-compiled for Scala 2.11, 2.12,
 2.13, [Scala.js 0.6.x & 1.0.x](http://www.scala-js.org/) and
-[Scala Native 0.3.x](https://www.scala-native.org/).
+[Scala Native 0.3.x & 0.4.0-M2](https://www.scala-native.org/).
 
 [![CircleCI](https://circleci.com/gh/monix/minitest.svg?style=svg)](https://circleci.com/gh/monix/minitest)
 
