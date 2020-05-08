@@ -64,6 +64,7 @@ object MySimpleSuite extends SimpleTestSuite {
     intercept[DummyException] {
       test()
     }
+    ()
   }
 
   test("test result of") {
