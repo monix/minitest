@@ -77,7 +77,7 @@ trait Asserts {
   def assertDoesNotCompile(code: String, expected: String): Unit =
     macro Asserts.DoesNotCompileMacros.applyImpl
 
-  def intercept[E <: Throwable : ClassTag](callback: => Unit)
+  def intercept[E <: Throwable : ClassTag](callback: => Any)
     (implicit pos: SourceLocation): Throwable = {
 
     val E = implicitly[ClassTag[E]]
