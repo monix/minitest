@@ -193,7 +193,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform)
     sharedSettings,
     crossVersionSharedSources,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.3"
+      "org.scalacheck" %%% "scalacheck" % "1.15.1"
     )
   )
   .jsSettings(
