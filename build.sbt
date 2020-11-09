@@ -141,7 +141,7 @@ lazy val requiredMacroCompatDeps = Seq(
     "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
   ),
   libraryDependencies ++= {
-    if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
+    if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch))
     else Nil
   },
   scalacOptions ++= {
