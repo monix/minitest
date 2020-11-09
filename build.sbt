@@ -18,13 +18,11 @@
 import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-// shadow sbt-scalajs' crossProject and CrossType until Scala.js 1.0.0 is released
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbt.Keys._
 import com.typesafe.sbt.GitVersioning
 
-addCommandAlias("ci-all",  ";+clean ;+test:compile; +minitestNative/test:compile ;+test ; +minitestNative/test ;+package")
-addCommandAlias("release", ";+clean ;+minitestNative/clean ;+package ;+minitestNative/package ;+publishSigned ;+minitestNative/publishSigned")
+addCommandAlias("ci-all",  ";+clean ;+test:compile ;+test ; +package")
+addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 
 val Scala211 = "2.11.12"
 val Scala212 = "2.12.10"
@@ -153,26 +151,19 @@ lazy val requiredMacroCompatDeps = Seq(
 )
 
 lazy val minitestRoot = project.in(file("."))
-  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS, lawsNative)
+  .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
     skip in publish := true,
   )
 
-lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(file("."))
+lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
   .settings(
     name := "minitest",
     sharedSettings,
     crossVersionSharedSources,
-    requiredMacroCompatDeps
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-sbt" % "test-interface" % "1.0"
-    ),
-  )
-  .platformsSettings(JVMPlatform, JSPlatform)(
+    requiredMacroCompatDeps,
     libraryDependencies ++= Seq(
       "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
     ),
@@ -180,42 +171,29 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform, NativePlatform).in(fil
       (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
     }
   )
-  .platformsSettings(NativePlatform)(
+  .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.portable-scala" %% "portable-scala-reflect" % "1.0.0" % "provided"
-    )
+      "org.scala-sbt" % "test-interface" % "1.0"
+    ),
   )
   .jsSettings(
     scalaJSSettings,
     libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
   )
-  .nativeSettings(
-    nativeSettings,
-    libraryDependencies += "org.scala-native" %%% "test-interface" % nativeVersion
-  )
 
 lazy val minitestJVM    = minitest.jvm
 lazy val minitestJS     = minitest.js
-lazy val minitestNative = minitest.native
 
-lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
+lazy val laws = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("laws"))
   .dependsOn(minitest)
   .settings(
     name := "minitest-laws",
     sharedSettings,
-    crossVersionSharedSources
-  )
-  .platformsSettings(JVMPlatform, JSPlatform)(
+    crossVersionSharedSources,
     libraryDependencies ++= Seq(
       "org.scalacheck" %%% "scalacheck" % "1.14.3"
-    )
-  )
-  .nativeSettings(
-    nativeSettings,
-    libraryDependencies ++= Seq(
-      "com.github.lolgab" %%% "scalacheck" % "1.14.1"
     )
   )
   .jsSettings(
@@ -224,4 +202,3 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform, NativePlatform)
 
 lazy val lawsJVM    = laws.jvm
 lazy val lawsJS     = laws.js
-lazy val lawsNative = laws.native
