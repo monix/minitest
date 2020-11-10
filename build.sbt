@@ -129,27 +129,6 @@ lazy val nativeSettings = Seq(
   publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
 )
 
-lazy val needsScalaParadise = settingKey[Boolean]("Needs Scala Paradise")
-
-lazy val requiredMacroCompatDeps = Seq(
-  needsScalaParadise := {
-    val sv = scalaVersion.value
-    (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
-  },
-  libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
-    "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-  ),
-  libraryDependencies ++= {
-    if (needsScalaParadise.value) Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch))
-    else Nil
-  },
-  scalacOptions ++= {
-    if (needsScalaParadise.value) Nil
-    else Seq("-Ymacro-annotations")
-  }
-)
-
 lazy val minitestRoot = project.in(file("."))
   .aggregate(minitestJVM, minitestJS, lawsJVM, lawsJS)
   .settings(
@@ -163,13 +142,15 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
     name := "minitest",
     sharedSettings,
     crossVersionSharedSources,
-    requiredMacroCompatDeps,
     libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
       "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.scala-sbt" % "test-interface" % "1.0"
     ),
-    unmanagedSourceDirectories in Compile += {
-      (baseDirectory in LocalRootProject).value / "jvm_js/src/main/scala"
-    }
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
