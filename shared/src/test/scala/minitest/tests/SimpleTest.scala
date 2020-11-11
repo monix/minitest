@@ -88,7 +88,7 @@ object SimpleTest extends SimpleTestSuite {
   }
 
   testAsync("asynchronous test") {
-    implicit val ec = minitest.platform.DefaultExecutionContext
+    implicit val ec = scala.concurrent.ExecutionContext.global
 
     Future(1).map(_+1).map { result =>
       assertEquals(result, 2)

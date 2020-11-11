@@ -41,7 +41,7 @@ object EnvironmentTest extends TestSuite[Int] {
   }
 
   testAsync("asynchronous test") { env =>
-    implicit val ec = minitest.platform.DefaultExecutionContext
+    implicit val ec = scala.concurrent.ExecutionContext.global
 
     Future(env).map(_+1).map { result =>
       assertEquals(result, env+1)
