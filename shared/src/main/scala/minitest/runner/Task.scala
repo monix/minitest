@@ -17,13 +17,22 @@
 
 package minitest.runner
 
+import org.portablescala.reflect.Reflect
 import minitest.api._
-import minitest.platform.{Await, loadModule}
 import sbt.testing.{Task => BaseTask, _}
 import scala.compat.Platform.EOL
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.Try
+
+private object Task {
+  private def loadModule(name: String, loader: ClassLoader): Any = {
+    Reflect
+      .lookupLoadableModuleClass(name + "$", loader)
+      .getOrElse(throw new ClassNotFoundException(name))
+      .loadModule()
+  }
+}
 
 final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   implicit val ec: ExecutionContext = DefaultExecutionContext
@@ -84,7 +93,7 @@ final class Task(task: TaskDef, cl: ClassLoader) extends BaseTask {
   }
 
   def loadSuite(name: String, loader: ClassLoader): Option[AbstractTestSuite] = {
-    Try(loadModule(name, loader)).toOption
+    Try(Task.loadModule(name, loader)).toOption
       .collect { case ref: AbstractTestSuite => ref }
   }
 

@@ -17,7 +17,7 @@
 
 package minitest.api
 
-import minitest.platform.EnableReflectiveInstantiation
+import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 
 @EnableReflectiveInstantiation
 trait AbstractTestSuite {
