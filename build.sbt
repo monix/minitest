@@ -152,11 +152,6 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
       "org.scala-sbt" % "test-interface" % "1.0"
     ),
   )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-sbt" % "test-interface" % "1.0"
-    ),
-  )
   .jsSettings(
     scalaJSSettings,
     libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
