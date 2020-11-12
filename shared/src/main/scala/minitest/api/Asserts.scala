@@ -18,13 +18,12 @@
 package minitest.api
 
 import java.util.regex.Matcher
-import java.util.regex.Pattern
-import scala.reflect.macros.{ whitebox, ParseException, TypecheckException }
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
-import scala.language.experimental.macros
 
-trait Asserts {
+import minitest.macros.CompileMacros
+
+trait Asserts extends CompileMacros {
   def assert(condition: => Boolean)(implicit pos: SourceLocation): Unit = {
     try {
       if (!condition) throw new AssertionException("assertion failed", pos)
@@ -70,12 +69,6 @@ trait Asserts {
         Asserts.format("received {0} != expected {1}", received, expected),
         pos)
   }
-
-  def assertDoesNotCompile(code: String): Unit =
-    macro Asserts.DoesNotCompileMacros.applyImplNoExp
-
-  def assertDoesNotCompile(code: String, expected: String): Unit =
-    macro Asserts.DoesNotCompileMacros.applyImpl
 
   def intercept[E <: Throwable : ClassTag](callback: => Any)
     (implicit pos: SourceLocation): Throwable = {
@@ -123,39 +116,5 @@ object Asserts extends Asserts {
       }
 
     loop(0, tpl)
-  }
-
-  /**
-    * Shamelessly copied from Shapeless, copyright by Miles Sabin.
-    */
-  class DoesNotCompileMacros(val c: whitebox.Context) {
-    import c.universe._
-
-    def applyImplNoExp(code: Tree): Tree = applyImpl(code, null)
-
-    def applyImpl(code: Tree, expected: Tree): Tree = {
-      val Literal(Constant(codeStr: String)) = code
-      val (expPat, expMsg) = expected match {
-        case null => (null, "Expected some error.")
-        case Literal(Constant(s: String)) =>
-          (Pattern.compile(s, Pattern.CASE_INSENSITIVE | Pattern.DOTALL), "Expected error matching: "+s)
-      }
-
-      try {
-        val dummy0 = TermName(c.freshName)
-        val dummy1 = TermName(c.freshName)
-        c.typecheck(c.parse(s"object $dummy0 { val $dummy1 = { $codeStr } }"))
-        c.error(c.enclosingPosition, "Type-checking succeeded unexpectedly.\n"+expMsg)
-      } catch {
-        case e: TypecheckException =>
-          val msg = e.getMessage
-          if((expected ne null) && !(expPat.matcher(msg)).matches)
-            c.error(c.enclosingPosition, "Type-checking failed in an unexpected way.\n"+expMsg+"\nActual error: "+msg)
-        case e: ParseException =>
-          c.error(c.enclosingPosition, s"Parsing failed.\n${e.getMessage}")
-      }
-
-      q"()"
-    }
   }
 }
