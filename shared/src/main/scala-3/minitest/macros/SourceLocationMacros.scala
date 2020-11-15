@@ -4,7 +4,7 @@ import scala.quoted._
 
 import minitest.api.SourceLocation
 
-private object SourceLocationMacros {
+object SourceLocationMacros {
   def impl()(using ctx: QuoteContext): Expr[SourceLocation] = {
     import qctx.tasty._
     val path = rootPosition.sourceFile.jpath
@@ -19,7 +19,7 @@ private object SourceLocationMacros {
   }
 }
 
-private[minitest] trait SourceLocationMacros {
+trait SourceLocationMacros {
   inline implicit def fromContext: SourceLocation =
     ${ SourceLocationMacros.impl() }
 }

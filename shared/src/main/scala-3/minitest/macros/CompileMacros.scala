@@ -6,7 +6,7 @@ import scala.compiletime.testing._
 
 import minitest.api.{AssertionException, SourceLocation}
 
-private object CompileMacros {
+object CompileMacros {
   inline def doesNotCompile(inline code: String, expected: Option[String], pos: SourceLocation): Unit = {
       val errors = typeCheckErrors(code)
       if (errors.isEmpty)
@@ -22,7 +22,7 @@ private object CompileMacros {
   }
 }
 
-private[minitest] trait CompileMacros {
+trait CompileMacros {
   inline def assertDoesNotCompile(inline code: String)(implicit pos: SourceLocation): Unit =
     CompileMacros.doesNotCompile(code, Option.empty, pos)
 
