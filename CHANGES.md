@@ -1,3 +1,15 @@
+## Version 2.9.0 (Nov 15, 2020)
+
+- Dotty support thanks to @larsrh
+
+Released on:
+
+Scala 2.12
+Scala 2.13
+Scala 3.0.0-M1
+Scala 0.27.0-RC1
+And everything is available on ScalaJS 1.x
+
 ## Version 2.8.2 (Apr 5, 2020)
 
 - Fix wrongly compiled ScalaJS version in the previous release
