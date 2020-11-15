@@ -65,7 +65,13 @@ lazy val sharedSettings = Seq(
       )
 
   ),
-
+  Compile / doc / sources := {
+    val old = (Compile / doc / sources).value
+    if (isDotty.value)
+      Seq()
+    else
+      old
+  },
   testFrameworks := Seq(new TestFramework("minitest.runner.Framework"))
 )
 
