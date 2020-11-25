@@ -5,10 +5,11 @@ import scala.quoted._
 import minitest.api.SourceLocation
 
 object SourceLocationMacros {
-  def impl()(using ctx: QuoteContext): Expr[SourceLocation] = {
-    import qctx.tasty._
-    val path = rootPosition.sourceFile.jpath
-    val startLine = rootPosition.startLine + 1
+  def impl()(using Quotes): Expr[SourceLocation] = {
+    import quotes.reflect._
+    val pos = Position.ofMacroExpansion
+    val path = pos.sourceFile.jpath
+    val startLine = pos.startLine + 1
     '{
       SourceLocation(
         ${Expr(Some(path.getFileName.toString))},
