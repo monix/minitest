@@ -10,7 +10,7 @@ For `build.sbt` (use the `%%%` operator for Scala.js):
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest" % "2.9.2" % "test"
+libraryDependencies += "io.monix" %% "minitest" % "2.9.3" % "test"
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
 ```
@@ -21,7 +21,7 @@ this being version `1.15.2`:
 
 ```scala
 // use the %%% operator for Scala.js
-libraryDependencies += "io.monix" %% "minitest-laws" % "2.9.2" % "test"
+libraryDependencies += "io.monix" %% "minitest-laws" % "2.9.3" % "test"
 ```
 
 Given that updates for ScalaCheck have been problematic, the ecosystem
