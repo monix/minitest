@@ -106,7 +106,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
         )
     ),
     libraryDependencies +=
-      ("org.portable-scala" %%% "portable-scala-reflect" % "1.0.0").withDottyCompat(scalaVersion.value)
+      ("org.portable-scala" %%% "portable-scala-reflect" % "1.1.1").withDottyCompat(scalaVersion.value)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
