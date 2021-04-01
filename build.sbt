@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import sbt._
+import sbt.{url, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
@@ -37,6 +37,19 @@ ThisBuild / scalacOptions ++= Seq(
   // definitely not what we want.
   "-sourcepath", file(".").getAbsolutePath.replaceAll("[.]$", "")
 )
+
+inThisBuild(List(
+  organization := "io.monix",
+  homepage := Some(url("https://monix.io")),
+  licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  developers := List(
+    Developer(
+      id="Avasil",
+      name="Piotr Gawrys",
+      email="pgawrys2@gmail.com",
+      url=url("https://github.com/Avasil")
+    ))
+))
 
 lazy val sharedSettings = Seq(
   // Version specific options
