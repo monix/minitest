@@ -142,7 +142,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform)
     name := "minitest-laws",
     sharedSettings,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.15.3"
+      "org.scalacheck" %%% "scalacheck" % "1.15.4"
     )
   )
   .jsSettings(
