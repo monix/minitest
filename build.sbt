@@ -27,7 +27,7 @@ addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 val Scala212 = "2.12.14"
 
 ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.5", "3.0.0")
+ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.5", "3.0.1")
 
 ThisBuild / scalacOptions ++= Seq(
   // Note, this is used by the doc-source-url feature to determine the
