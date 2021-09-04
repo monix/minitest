@@ -24,10 +24,10 @@ import com.typesafe.sbt.GitVersioning
 addCommandAlias("ci-all",  ";+clean ;+test:compile ;+test ; +package")
 addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 
-val Scala212 = "2.12.13"
+val Scala212 = "2.12.14"
 
 ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.6", "3.0.0")
+ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.5", "3.0.2")
 
 ThisBuild / scalacOptions ++= Seq(
   // Note, this is used by the doc-source-url feature to determine the
