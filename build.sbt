@@ -27,7 +27,7 @@ addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 val Scala212 = "2.12.14"
 
 ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.5", "3.0.2")
+ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.7", "3.0.2")
 
 ThisBuild / scalacOptions ++= Seq(
   // Note, this is used by the doc-source-url feature to determine the
@@ -50,6 +50,10 @@ inThisBuild(List(
       url=url("https://github.com/Avasil")
     ))
 ))
+
+val isDotty = Def.setting(
+  CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
+)
 
 lazy val sharedSettings = Seq(
   // Version specific options
@@ -89,7 +93,7 @@ lazy val sharedSettings = Seq(
 )
 
 lazy val scalaJSSettings = Seq(
-  scalaJSStage in Test := FastOptStage
+  Test / scalaJSStage := FastOptStage
 )
 
 lazy val minitestRoot = project.in(file("."))
@@ -97,7 +101,7 @@ lazy val minitestRoot = project.in(file("."))
   .settings(
     name := "minitest root",
     Compile / sources := Nil,
-    skip in publish := true,
+    publish / skip := true,
   )
 
 lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
@@ -119,16 +123,14 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
         )
     ),
     libraryDependencies +=
-      ("org.portable-scala" %%% "portable-scala-reflect" % "1.1.1").withDottyCompat(scalaVersion.value)
+      "org.portable-scala" %%% "portable-scala-reflect" % "1.1.1" cross CrossVersion.for3Use2_13
   )
   .jvmSettings(
-    libraryDependencies ++= Seq(
-      ("org.scala-sbt" % "test-interface" % "1.0").withDottyCompat(scalaVersion.value)
-    ),
+    libraryDependencies += "org.scala-sbt" % "test-interface" % "1.0",
   )
   .jsSettings(
     scalaJSSettings,
-    libraryDependencies += ("org.scala-js" %% "scalajs-test-interface" % scalaJSVersion).withDottyCompat(scalaVersion.value)
+    libraryDependencies += "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion cross CrossVersion.for3Use2_13,
   )
 
 lazy val minitestJVM    = minitest.jvm
