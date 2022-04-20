@@ -123,7 +123,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
         )
     ),
     libraryDependencies +=
-      "org.portable-scala" %%% "portable-scala-reflect" % "1.1.1" cross CrossVersion.for3Use2_13
+      "org.portable-scala" %%% "portable-scala-reflect" % "1.1.2" cross CrossVersion.for3Use2_13
   )
   .jvmSettings(
     libraryDependencies += "org.scala-sbt" % "test-interface" % "1.0",
