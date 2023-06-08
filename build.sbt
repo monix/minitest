@@ -24,7 +24,7 @@ import com.typesafe.sbt.GitVersioning
 addCommandAlias("ci-all",  ";+clean ;+test:compile ;+test ; +package")
 addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 
-val Scala212 = "2.12.14"
+val Scala212 = "2.12.18"
 
 ThisBuild / scalaVersion := Scala212
 ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.7", "3.0.2")
