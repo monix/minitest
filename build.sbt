@@ -19,15 +19,13 @@ import sbt.{url, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
-import com.typesafe.sbt.GitVersioning
-
 addCommandAlias("ci-all",  ";+clean ;+test:compile ;+test ; +package")
 addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 
-val Scala212 = "2.12.14"
+val Scala212 = "2.12.21"
 
 ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.7", "3.0.2")
+ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.18", "3.8.3")
 
 ThisBuild / scalacOptions ++= Seq(
   // Note, this is used by the doc-source-url feature to determine the
@@ -123,7 +121,7 @@ lazy val minitest = crossProject(JVMPlatform, JSPlatform).in(file("."))
         )
     ),
     libraryDependencies +=
-      "org.portable-scala" %%% "portable-scala-reflect" % "1.1.1" cross CrossVersion.for3Use2_13
+      "org.portable-scala" %%% "portable-scala-reflect" % "1.1.3" cross CrossVersion.for3Use2_13
   )
   .jvmSettings(
     libraryDependencies += "org.scala-sbt" % "test-interface" % "1.0",
@@ -144,7 +142,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform)
     name := "minitest-laws",
     sharedSettings,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.15.4"
+      "org.scalacheck" %%% "scalacheck" % "1.19.0"
     )
   )
   .jsSettings(
