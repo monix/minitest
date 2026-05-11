@@ -1,0 +1,43 @@
+name: opencode-upgrades
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Every Monday at 9am UTC
+  workflow_dispatch:
+
+jobs:
+  opencode:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: "21"
+          distribution: temurin
+      - uses: sbt/setup-sbt@v1
+
+      - name: Load prompt file
+        id: load-prompt
+        run: |
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat .github/prompts/upgrades.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Run opencode
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: opencode-go/deepseek-v4-pro
+          use_github_token: true
+          prompt: ${{ steps.load-prompt.outputs.content }}
