@@ -25,7 +25,7 @@ addCommandAlias("release", ";+clean ;+package ;+publishSigned")
 val Scala212 = "2.12.21"
 
 ThisBuild / scalaVersion := Scala212
-ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.18", "3.8.3")
+ThisBuild / crossScalaVersions := Seq(Scala212, "2.13.18", "3.9.0")
 
 ThisBuild / scalacOptions ++= Seq(
   // Note, this is used by the doc-source-url feature to determine the
@@ -142,7 +142,7 @@ lazy val laws = crossProject(JVMPlatform, JSPlatform)
     name := "minitest-laws",
     sharedSettings,
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.19.0"
+      "org.scalacheck" %%% "scalacheck" % "1.20.0"
     )
   )
   .jsSettings(
